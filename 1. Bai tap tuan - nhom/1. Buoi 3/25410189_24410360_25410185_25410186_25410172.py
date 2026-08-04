@@ -6,6 +6,56 @@
 #  - 25410186 - Nguyễn Tấn Đạt
 #  - 25410172 - Nguyễn Hồng Anh
 
+# BAI #1 - 25410186 - NGUYEN TAN DAT
+
+str_input = input("Nhập chuỗi: ")
+
+# 1. Tính độ dài chuỗi
+print("Độ dài chuỗi:", len(str_input))
+
+# Danh sách ký tự đặc biệt cần kiểm tra
+special_chars = r"-=\`!@#$%^&*()_+|[]{};'\":,./<>?"
+
+# Khởi tạo các danh sách
+special_list = []
+lower_list = []
+digit_list = []
+upper_list = []
+
+# Duyệt từng ký tự trong chuỗi
+for ch in str_input:
+    if ch in special_chars:
+        special_list.append(ch)
+
+    if 'a' <= ch <= 'z':
+        lower_list.append(ch)
+
+    if 'A' <= ch <= 'Z':
+        upper_list.append(ch)
+
+    if '0' <= ch <= '9':
+        digit_list.append(ch)
+
+# 2. Ký tự đặc biệt
+print("\nKý tự đặc biệt:")
+print("Số lượng:", len(special_list))
+print("Các ký tự:", special_list)
+
+# 3. Chữ thường [a-z]
+print("\nChữ thường [a-z]:")
+print("Số lượng:", len(lower_list))
+print("Các ký tự:", lower_list)
+
+# 4. Chữ số [0-9]
+print("\nChữ số [0-9]:")
+print("Số lượng:", len(digit_list))
+print("Các ký tự:", digit_list)
+
+# 5. Chữ hoa [A-Z]
+print("\nChữ hoa [A-Z]:")
+print("Số lượng:", len(upper_list))
+print("Các ký tự:", upper_list)
+
 # BAI #3 - KIEM TRA ID VA PASSWORD 24410360 TRAN QUYNH TIEN
 def check_id(user_id):
     cam = "!@#$%^&*()-=+"
