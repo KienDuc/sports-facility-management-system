@@ -56,6 +56,43 @@ print("\nChữ hoa [A-Z]:")
 print("Số lượng:", len(upper_list))
 print("Các ký tự:", upper_list)
 
+## Bai 2: KIEM TRA CHUOI NHAP VAO CO PHAI EMAIL KHONG - 25410185 - Nguyen Phong Dat
+
+def kiemTraEmail(email):
+    email = email.strip()
+
+    tenMien = [
+        "@gmail.com",
+        "@yahoo.com",
+        "@hotmail.com",
+        "@outlook.com",
+        "@icloud.com",
+        "@proton.me",
+        "@protonmail.com",
+        "@uit.edu.vn"
+    ]
+    for mien in tenMien:
+        if email.endswith(mien):
+            ten = email[:-len(mien)]
+
+            if len(ten) < 6:
+                return False
+
+            for kyTu in ten:
+                if not (kyTu.isalnum() or kyTu == "."):
+                    return False
+
+            return True
+
+    return False
+
+email = input("Nhap Email: ")
+
+if kiemTraEmail(email):
+    print("Day la Email hop le!")
+else:
+    print("Day khong phai la Email hop le!")
+
 # BAI #3 - KIEM TRA ID VA PASSWORD 24410360 TRAN QUYNH TIEN
 def check_id(user_id):
     cam = "!@#$%^&*()-=+"
