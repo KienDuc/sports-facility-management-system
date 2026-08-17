@@ -16,7 +16,7 @@ class CourtBase(BaseModel):
   )
   is_active: bool = Field(default=True, description="Trạng thái sân hoạt động")
 
-class CourtCreate(BaseModel):
+class CourtCreate(CourtBase):
     pass # Kế thừa toàn bộ từ CourtBase
 
 class CourtUpdate(BaseModel):
