@@ -1,6 +1,8 @@
 import time
+from typing import Optional
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.booking import Booking, BookingSlot
@@ -20,6 +22,79 @@ class BookingCreate(BaseModel):
 
 class BookingStatusUpdate(BaseModel):
     status: str
+
+
+# --- 0. API: DANH SÁCH ĐƠN ĐẶT & TRA CỨU (Tìm theo Mã đơn / Tên KH / SĐT, lọc theo trạng thái & ngày) ---
+@router.get("/")
+def get_bookings(
+    keyword: Optional[str] = None,
+    status: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(Booking)
+
+    # Tra cứu nhanh theo Mã đơn / Tên khách hàng / SĐT
+    if keyword:
+        like_keyword = f"%{keyword.strip()}%"
+        query = query.filter(
+            or_(
+                Booking.booking_code.ilike(like_keyword),
+                Booking.customer_name.ilike(like_keyword),
+                Booking.customer_phone.ilike(like_keyword),
+            )
+        )
+
+    # Lọc theo trạng thái đơn (booked / playing / canceled...)
+    if status and status != "all":
+        query = query.filter(Booking.status == status)
+
+    # Lọc theo khoảng ngày đặt sân
+    if date_from:
+        query = query.filter(Booking.booking_date >= date_from)
+    if date_to:
+        query = query.filter(Booking.booking_date <= date_to)
+
+    bookings = query.order_by(Booking.created_at.desc()).all()
+
+    result = []
+    for booking in bookings:
+        result.append({
+            "id": booking.id,
+            "booking_code": booking.booking_code,
+            "customer_name": booking.customer_name,
+            "customer_phone": booking.customer_phone,
+            "booking_date": booking.booking_date,
+            "total_price": booking.total_price,
+            "status": booking.status,
+            "note": booking.note,
+            "created_at": booking.created_at.isoformat() if booking.created_at else None,
+            "slots": [
+                {
+                    "court_id": slot.court_id,
+                    "court_name": slot.court.name if slot.court else None,
+                    "court_type": slot.court.type if slot.court else None,
+                    "start_time": slot.start_time,
+                    "end_time": slot.end_time,
+                    "price": slot.price,
+                }
+                for slot in booking.slots
+            ],
+            "services": [
+                {
+                    "service_id": bs.service_id,
+                    "service_name": bs.service.name if bs.service else None,
+                    "unit": bs.service.unit if bs.service else None,
+                    "quantity": bs.quantity,
+                    "unit_price": bs.unit_price,
+                    "total_price": bs.total_price,
+                }
+                for bs in booking.services
+            ],
+        })
+
+    return result
 
 
 # --- 1. API: LẤY LỊCH TRỰC QUAN ---
