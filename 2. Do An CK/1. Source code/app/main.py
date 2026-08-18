@@ -16,7 +16,8 @@ app = FastAPI(title=settings.PROJECT_NAME)
 # Cấu hình CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:63342",
+                   "http://127.0.0.1:63342"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
