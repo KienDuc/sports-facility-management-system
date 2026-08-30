@@ -37,6 +37,16 @@
                     </button>
                 </div>
 
+                <!-- MENU 2: Danh Sách Đơn Đặt & Tra Cứu Booking -->
+                <div class="px-2 mb-1">
+                    <button onclick="loadPage('menu2_bookings.html', 'Danh Sách Đơn Đặt & Tra Cứu Booking', this)" class="menu-btn w-full flex items-center px-2 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors text-left overflow-hidden" title="Danh Sách Đơn Đặt & Tra Cứu Booking">
+                        <div class="w-8 flex justify-center flex-shrink-0">
+                            <i class="fa-solid fa-clipboard-list text-xl"></i>
+                        </div>
+                        <span class="font-medium ml-3 menu-text whitespace-nowrap transition-opacity duration-200">Danh Sách Đơn Đặt &amp; Tra Cứu Booking</span>
+                    </button>
+                </div>
+
                 <!-- MENU 3: Nhóm Quản Lý Sân & Dịch Vụ -->
                 <div class="px-2 mb-1">
                     <button onclick="toggleSubMenu('submenu-courts', this)" class="w-full flex items-center px-2 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors text-left overflow-hidden" title="Quản lý Sân & Dịch vụ">
@@ -56,6 +66,12 @@
                                 <i class="fa-solid fa-vector-square text-sm"></i>
                             </div>
                             <span class="menu-text whitespace-nowrap ml-2 transition-opacity duration-200">Quản lý sân</span>
+                        </button>
+                        <button onclick="loadPage('menu3_services.html', 'Danh sách dịch vụ', this)" class="menu-btn w-full flex items-center px-2 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors text-left overflow-hidden" title="Danh sách dịch vụ">
+                            <div class="w-6 flex justify-center flex-shrink-0">
+                                <i class="fa-solid fa-concierge-bell text-sm"></i>
+                            </div>
+                            <span class="menu-text whitespace-nowrap ml-2 transition-opacity duration-200">Danh sách dịch vụ</span>
                         </button>
                     </div>
                 </div>
