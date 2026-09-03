@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SFMS - Trung Tâm Thể Thao & Đặt Sân Trực Tuyến</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- AOS Animation -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <!-- Vanilla Tilt (3D Tilt Effect) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+
+  <style>
+    /* Robot Float Animation */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .animate-float {
+      animation: float 3.5s ease-in-out infinite;
+    }
+    /* Typing Cursor */
+    .typing-cursor::after {
+      content: '|';
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- ================= 1. HEADER / NAVIGATION ================= -->
+  <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-2xl flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition duration-300">
+          <i class="fa-solid fa-bolt-lightning text-xl"></i>
+        </div>
+        <span class="text-2xl font-black tracking-tight text-slate-900">SFMS<span class="text-emerald-600">.</span></span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-8 font-semibold text-sm text-slate-600">
+        <a href="#about" class="hover:text-emerald-600 transition">Về trung tâm</a>
+        <a href="#courts" class="hover:text-emerald-600 transition">Hệ thống sân</a>
+        <a href="#services" class="hover:text-emerald-600 transition">Dịch vụ & Tiện ích</a>
+        <a href="#pricing" class="hover:text-emerald-600 transition">Bảng giá</a>
+        <a href="#contact" class="hover:text-emerald-600 transition">Liên hệ</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <a href="/admin/login" class="px-4 py-2 text-sm font-bold text-slate-700 hover:text-emerald-600 hover:bg-slate-100 rounded-xl transition flex items-center gap-2">
+          <i class="fa-regular fa-user"></i> Đăng nhập
+        </a>
+        <a href="#booking" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-600/25 transition duration-200 flex items-center gap-2">
+          <i class="fa-solid fa-calendar-check"></i> Đặt Sân Ngay
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= 2. HERO BANNER: DARK THEME + INTERACTIVE CANVAS + 2D PITCH ================= -->
+  <section class="relative bg-slate-950 text-white pt-20 pb-28 overflow-hidden">
+
+    <!-- INTERACTIVE HTML5 CANVAS (Laser Particle Mesh) -->
+    <canvas id="particleCanvas" class="absolute inset-0 w-full h-full pointer-events-auto z-0"></canvas>
+
+    <!-- Radial Glow spots behind canvas -->
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+      <!-- Top Title & Badge -->
+      <div class="text-center max-w-4xl mx-auto mb-12">
+        <div data-aos="fade-down" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-6 shadow-inner backdrop-blur-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          Tổ Hợp Sân Đa Năng • Đặt Sân Tương Tác 24/7
+        </div>
+
+        <h1 data-aos="fade-up" data-aos-delay="100" class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-tight mb-6">
+          Trải nghiệm thể thao đỉnh cao cùng <br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300">SFMS Arena</span>
+        </h1>
+
+        <p data-aos="fade-up" data-aos-delay="200" class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto">
+          Hệ thống sân cỏ nhân tạo, Pickleball, Tennis và Cầu lông chuẩn quốc tế. Hệ thống đèn chống chói, tương tác chọn sân thời gian thực.
+        </p>
+      </div>
+
+      <!-- MAIN INTERACTIVE STUDIO BOX (White Glass Box over Dark Banner) -->
+      <div id="booking" data-aos="zoom-in" data-aos-delay="300" class="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200/80 text-slate-800 relative z-20">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+
+          <!-- LEFT (7 COLS): INTERACTIVE CONTROLS & ESTIMATOR -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders"></i> Bộ Tùy Chọn Đặt Sân
+              </span>
+              <span id="liveSportBadge" class="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">
+                Sân Bóng Đá 5-7
+              </span>
+            </div>
+
+            <!-- Sport selection buttons -->
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase mb-2">1. Chọn môn thể thao</label>
+              <div class="grid grid-cols-3 gap-3">
+                <button type="button" onclick="changeSport('football', 250000, 'Sân Bóng Đá 5-7')" id="tab-football" class="sport-tab-btn active p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm">
+                  <i class="fa-solid fa-futbol text-emerald-600"></i> Bóng Đá
+                </button>
+                <button type="button" onclick="changeSport('pickleball', 180000, 'Sân Pickleball Pro')" id="tab-pickleball" class="sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+                  <i class="fa-solid fa-table-tennis-paddle-ball text-slate-400"></i> Pickleball
+                </button>
+                <button type="button" onclick="changeSport('badminton', 120000, 'Sân Cầu Lông Yonex')" id="tab-badminton" class="sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition">
+                  <i class="fa-solid fa-feather text-slate-400"></i> Cầu Lông
+                </button>
+              </div>
+            </div>
+
+            <!-- Time slot buttons -->
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase mb-2">2. Khung giờ thi đấu</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <button type="button" onclick="selectSlot(this, 1)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-700 hover:border-emerald-500 transition">06:00 - 07:00</button>
+                <button type="button" onclick="selectSlot(this, 1.5)" class="slot-pill active p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 font-bold text-emerald-800 transition">17:30 - 19:00</button>
+                <button type="button" onclick="selectSlot(this, 1.5)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-700 hover:border-emerald-500 transition">19:00 - 20:30</button>
+                <button type="button" onclick="selectSlot(this, 2)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-700 hover:border-emerald-500 transition">20:30 - 22:30</button>
+              </div>
+            </div>
+
+            <!-- Addon checkbox -->
+            <div>
+              <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer text-xs font-semibold text-slate-700">
+                <div class="flex items-center gap-2.5">
+                  <input type="checkbox" id="addonWater" onchange="toggleAddon(120000, this.checked)" checked class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+                  <span>Ướp lạnh sẵn 1 thùng nước khoáng (24 chai)</span>
+                </div>
+                <span class="text-emerald-600 font-bold">+120k</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- RIGHT (5 COLS): 2D INTERACTIVE PITCH SIMULATOR + ESTIMATED CHECKOUT -->
+          <div class="lg:col-span-5 bg-slate-950 rounded-2xl p-5 text-white flex flex-col justify-between shadow-xl min-h-[340px]">
+            <div>
+              <div class="flex justify-between items-center mb-2 px-1">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sơ Đồ Mặt Sân Trực Quan
+                </span>
+                <span class="text-[10px] text-slate-400"><i class="fa-solid fa-hand-pointer mr-1"></i> Bấm để di chuyển bóng</span>
+              </div>
+
+              <!-- Interactive 2D Pitch Box -->
+              <div id="interactivePitch" class="w-full h-44 rounded-xl border-2 border-emerald-500/40 bg-emerald-950/80 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500" onclick="kickBall()">
+                <!-- SVG Pitch Lines -->
+                <svg id="pitchSvg" class="w-full h-full absolute inset-0 opacity-40" viewBox="0 0 300 150">
+                  <rect x="10" y="10" width="280" height="130" fill="none" stroke="white" stroke-width="2"/>
+                  <line x1="150" y1="10" x2="150" y2="140" stroke="white" stroke-width="2"/>
+                  <circle cx="150" cy="75" r="28" fill="none" stroke="white" stroke-width="2"/>
+                  <rect x="10" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
+                  <rect x="255" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
+                </svg>
+
+                <!-- Ball / Equipment Icon Object -->
+                <div id="ballElement" class="absolute w-8 h-8 rounded-full bg-white text-slate-900 flex items-center justify-center shadow-lg transition-all duration-500 ease-out z-10" style="left: calc(50% - 16px); top: calc(50% - 16px);">
+                  <i id="ballIcon" class="fa-solid fa-futbol text-xs text-slate-900"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price & Action -->
+            <div class="pt-4 mt-2 border-t border-slate-800 flex justify-between items-end">
+              <div>
+                <span class="text-[11px] text-slate-400 block">Dự tính thanh toán:</span>
+                <span id="calculatedPrice" class="text-2xl font-black text-white">495.000 <span class="text-xs font-bold text-emerald-400">VNĐ</span></span>
+              </div>
+              <a href="/booking" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/25 transition duration-200 flex items-center gap-1.5">
+                <i class="fa-solid fa-check"></i> Đặt Sân Nhanh
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 3. HIGHLIGHT STATS ================= -->
+  <section class="border-y border-slate-200 bg-white py-10">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <div data-aos="fade-up" data-aos-delay="50">
+        <div class="text-3xl sm:text-4xl font-black text-slate-900">12+</div>
+        <div class="text-xs font-bold text-slate-400 uppercase mt-1">Sân bãi đa năng</div>
+      </div>
+      <div data-aos="fade-up" data-aos-delay="100">
+        <div class="text-3xl sm:text-4xl font-black text-emerald-600">100%</div>
+        <div class="text-xs font-bold text-slate-400 uppercase mt-1">Đèn LED chống chói</div>
+      </div>
+      <div data-aos="fade-up" data-aos-delay="150">
+        <div class="text-3xl sm:text-4xl font-black text-slate-900">5.000+</div>
+        <div class="text-xs font-bold text-slate-400 uppercase mt-1">Vận động viên / Tháng</div>
+      </div>
+      <div data-aos="fade-up" data-aos-delay="200">
+        <div class="text-3xl sm:text-4xl font-black text-teal-600">24/7</div>
+        <div class="text-xs font-bold text-slate-400 uppercase mt-1">Hỗ trợ & Đặt sân online</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 4. COURTS SHOWCASE (3D TILT CARDS) ================= -->
+  <section id="courts" class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto mb-16" data-aos="fade-up">
+      <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Hệ Thống Cơ Sở</span>
+      <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-2">Các Sân Thể Thao Tại Trung Tâm</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+      <!-- Court 1 -->
+      <div data-tilt data-tilt-max="8" data-tilt-speed="300" data-aos="fade-up" data-aos-delay="100" class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-emerald-300 transition duration-300 flex flex-col justify-between">
+        <div>
+          <div class="h-52 bg-emerald-50 relative flex items-center justify-center text-emerald-600/30 overflow-hidden">
+            <i class="fa-solid fa-futbol text-7xl transition-transform duration-500 hover:scale-110"></i>
+            <span class="absolute top-4 right-4 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">6 Sân 5 & 2 Sân 7</span>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Sân Bóng Đá Cỏ Nhân Tạo</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Mặt cỏ đệm êm giảm chấn, chống trượt tối ưu, hệ thống thoát nước chuẩn không đọng vũng khi mưa.</p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-4 border-t border-slate-100 flex justify-between items-center">
+          <div>
+            <span class="text-xs text-slate-400 block">Giá thuê từ</span>
+            <span class="text-lg font-black text-emerald-600">250.000 đ<span class="text-xs text-slate-400 font-normal">/giờ</span></span>
+          </div>
+          <a href="/booking?sport=football" class="px-4 py-2.5 bg-slate-900 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition">Chọn sân</a>
+        </div>
+      </div>
+
+      <!-- Court 2 -->
+      <div data-tilt data-tilt-max="8" data-tilt-speed="300" data-aos="fade-up" data-aos-delay="200" class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-teal-300 transition duration-300 flex flex-col justify-between">
+        <div>
+          <div class="h-52 bg-teal-50 relative flex items-center justify-center text-teal-600/30 overflow-hidden">
+            <i class="fa-solid fa-table-tennis-paddle-ball text-7xl transition-transform duration-500 hover:scale-110"></i>
+            <span class="absolute top-4 right-4 bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">4 Sân Trong Nhà</span>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Sân Pickleball Chuẩn Thi Đấu</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Sàn phủ sơn Acrylic giảm áp lực lên khớp, lưới đạt chuẩn USA Pickleball, có mái che thoáng mát 100%.</p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-4 border-t border-slate-100 flex justify-between items-center">
+          <div>
+            <span class="text-xs text-slate-400 block">Giá thuê từ</span>
+            <span class="text-lg font-black text-teal-600">180.000 đ<span class="text-xs text-slate-400 font-normal">/giờ</span></span>
+          </div>
+          <a href="/booking?sport=pickleball" class="px-4 py-2.5 bg-slate-900 hover:bg-teal-600 text-white text-xs font-bold rounded-xl transition">Chọn sân</a>
+        </div>
+      </div>
+
+      <!-- Court 3 -->
+      <div data-tilt data-tilt-max="8" data-tilt-speed="300" data-aos="fade-up" data-aos-delay="300" class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:border-blue-300 transition duration-300 flex flex-col justify-between">
+        <div>
+          <div class="h-52 bg-blue-50 relative flex items-center justify-center text-blue-600/30 overflow-hidden">
+            <i class="fa-solid fa-feather text-7xl transition-transform duration-500 hover:scale-110"></i>
+            <span class="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">8 Sân Thảm Yonex</span>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Sân Cầu Lông & Tennis</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Trần cao 11m đạt chuẩn BWF, thảm PVC chuyên dụng chống lật sơ mi, trang bị quạt công nghiệp mát mẻ.</p>
+          </div>
+        </div>
+        <div class="px-6 pb-6 pt-4 border-t border-slate-100 flex justify-between items-center">
+          <div>
+            <span class="text-xs text-slate-400 block">Giá thuê từ</span>
+            <span class="text-lg font-black text-blue-600">120.000 đ<span class="text-xs text-slate-400 font-normal">/giờ</span></span>
+          </div>
+          <a href="/booking?sport=badminton" class="px-4 py-2.5 bg-slate-900 hover:bg-blue-600 text-white text-xs font-bold rounded-xl transition">Chọn sân</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= 5. SERVICES & AMENITIES ================= -->
+  <section id="services" class="bg-slate-100/60 py-24 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-16" data-aos="fade-up">
+        <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest">Tiện Ích Vượt Trội</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 mt-2">Dịch Vụ Đi Kèm Tại SFMS</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div data-aos="fade-up" data-aos-delay="100" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-shower"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-1">Phòng Tắm & Locker</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Nước nóng lạnh miễn phí, tủ khóa an toàn có chìa riêng biệt.</p>
+        </div>
+
+        <div data-aos="fade-up" data-aos-delay="200" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-bottle-water"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-1">Canteen & Đồ Uống</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Nước khoáng bù điện giải ướp lạnh, nước tăng lực và đồ ăn nhẹ.</p>
+        </div>
+
+        <div data-aos="fade-up" data-aos-delay="300" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-shirt"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-1">Dụng Cụ & Áo Bib</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Cho thuê vợt Pickleball/Tennis xịn, bóng thi đấu và áo phân đội.</p>
+        </div>
+
+        <div data-aos="fade-up" data-aos-delay="400" class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-square-parking"></i>
+          </div>
+          <h4 class="font-bold text-slate-900 mb-1">Bãi Đỗ Xe Rộng Rãi</h4>
+          <p class="text-xs text-slate-500 leading-relaxed">Bãi giữ xe máy & ô tô có mái che, camera an ninh 24/24.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 6. FOOTER ================= -->
+  <footer id="contact" class="bg-slate-950 text-slate-400 py-16 border-t border-slate-800 text-sm">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div>
+        <div class="flex items-center gap-2 text-white font-black text-xl mb-4">
+          <i class="fa-solid fa-bolt text-emerald-400"></i> SFMS Arena
+        </div>
+        <p class="text-slate-400 text-xs leading-relaxed">Hệ thống sân bãi thể thao chất lượng cao hàng đầu khu vực, đáp ứng mọi nhu cầu rèn luyện sức khỏe và thi đấu phong trào.</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold mb-3 uppercase text-xs tracking-wider">Thông tin liên hệ</h5>
+        <p class="text-xs mb-2"><i class="fa-solid fa-location-dot mr-2 text-emerald-400"></i> Số 123 Đường Thể Thao, Quận Tân Bình, TP.HCM</p>
+        <p class="text-xs mb-2"><i class="fa-solid fa-phone mr-2 text-emerald-400"></i> Hotline: 1900 6868</p>
+        <p class="text-xs"><i class="fa-solid fa-envelope mr-2 text-emerald-400"></i> contact@sfms.com</p>
+      </div>
+      <div>
+        <h5 class="text-white font-bold mb-3 uppercase text-xs tracking-wider">Thời gian phục vụ</h5>
+        <p class="text-xs mb-1">Thứ 2 - Chủ Nhật: 05:30 - 23:00</p>
+        <p class="text-xs text-slate-500">Mở cửa hoạt động xuyên suốt cả các ngày lễ tết.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= 7. FLOATING AI ROBOT MASCOT & CHATBOX ================= -->
+
+  <!-- Robot Mascot Trigger Button -->
+  <div class="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+    <div class="hidden sm:flex items-center gap-2 bg-white px-3.5 py-2 rounded-2xl shadow-xl border border-slate-200 text-xs font-bold text-slate-800 animate-bounce">
+      <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      Cần tìm sân trống? Hỏi tôi nhé!
+    </div>
+
+    <button onclick="toggleChat()" class="relative p-1 bg-white rounded-full shadow-2xl border-2 border-emerald-500 hover:scale-110 transition-transform duration-300 focus:outline-none">
+      <div class="w-13 h-13 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center p-2 animate-float">
+        <svg class="w-8 h-8 text-white" viewBox="0 0 100 100" fill="none">
+          <line x1="50" y1="20" x2="50" y2="8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="50" cy="8" r="4" fill="#fbbf24"/>
+          <rect x="22" y="20" width="56" height="48" rx="14" fill="#0f172a" stroke="white" stroke-width="3"/>
+          <rect x="30" y="32" width="40" height="22" rx="6" fill="#064e3b"/>
+          <circle cx="40" cy="43" r="4" fill="#34d399"/>
+          <circle cx="60" cy="43" r="4" fill="#34d399"/>
+          <path d="M42 58 Q50 64 58 58" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="absolute top-0 right-0 flex h-3.5 w-3.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white"></span>
+      </span>
+    </button>
+  </div>
+
+  <!-- AI Chat Window -->
+  <div id="chatWindow" class="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-2.5rem)] h-[520px] bg-white rounded-3xl shadow-2xl border border-slate-200 z-50 flex flex-col hidden overflow-hidden transition-all duration-300">
+    <div class="bg-slate-900 p-4 text-white flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-sm">SFMS AI Assistant</h4>
+          <span class="text-[11px] text-emerald-400 flex items-center gap-1 font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Đang trực tuyến
+          </span>
+        </div>
+      </div>
+      <button onclick="toggleChat()" class="text-slate-400 hover:text-white p-1">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+      <div class="flex gap-2.5 items-start">
+        <div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] shadow-sm">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-slate-800 shadow-sm max-w-[85%] leading-relaxed">
+          Xin chào! Tôi là trợ lý ảo của SFMS. Bạn cần hỗ trợ kiểm tra sân trống, xem bảng giá hay tìm đội thi đấu?[cite: 1]
+        </div>
+      </div>
+    </div>
+
+    <div class="px-3 py-2 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
+      <button onclick="sendQuickPrompt('Giá sân Pickleball tối nay?')" class="px-3 py-1.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded-full border border-slate-200 font-semibold transition">
+        🏸 Giá sân Pickleball?[cite: 1]
+      </button>
+      <button onclick="sendQuickPrompt('Sân bóng đá còn trống sau 18h không?')" class="px-3 py-1.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded-full border border-slate-200 font-semibold transition">
+        ⚽ Sân bóng sau 18h?[cite: 1]
+      </button>
+    </div>
+
+    <form id="chatForm" onsubmit="handleChatSubmit(event)" class="p-3 bg-white border-t border-slate-200 flex gap-2">
+      <input type="text" id="chatInput" placeholder="Nhập câu hỏi của bạn..." class="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:bg-white focus:border-emerald-500 transition">
+      <button type="submit" class="w-9 h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-center shadow-md transition">
+        <i class="fa-solid fa-paper-plane text-xs"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- ================= 8. JAVASCRIPT ================= -->
+  <script>
+    // 1. Initialize AOS
+    AOS.init({
+      duration: 700,
+      once: true,
+      easing: 'ease-out-cubic'
+    });
+
+    // 2. INTERACTIVE PARTICLES CANVAS SYSTEM
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let particlesArray = [];
+    let mouse = { x: null, y: null, radius: 140 };
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.offsetWidth;
+      canvas.height = canvas.parentElement.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    window.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 1.2;
+        this.speedY = (Math.random() - 0.5) * 1.2;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+        if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+
+        // Interaction with mouse
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < mouse.radius) {
+          this.x -= (dx / distance) * 2;
+          this.y -= (dy / distance) * 2;
+        }
+      }
+      draw() {
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.7)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function initParticles() {
+      particlesArray = [];
+      const numParticles = Math.floor((canvas.width * canvas.height) / 9000);
+      for (let i = 0; i < numParticles; i++) {
+        particlesArray.push(new Particle());
+      }
+    }
+    initParticles();
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particlesArray.length; i++) {
+        particlesArray[i].update();
+        particlesArray[i].draw();
+
+        for (let j = i; j < particlesArray.length; j++) {
+          let dx = particlesArray[i].x - particlesArray[j].x;
+          let dy = particlesArray[i].y - particlesArray[j].y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < 90) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(16, 185, 129, ${0.25 - distance / 360})`;
+            ctx.lineWidth = 0.8;
+            ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+            ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // 3. 2D PITCH & LIVE ESTIMATION LOGIC
+    let sportRate = 250000;
+    let slotHours = 1.5;
+    let addonPrice = 120000;
+
+    function changeSport(type, rate, label) {
+      sportRate = rate;
+      document.getElementById('liveSportBadge').innerText = label;
+
+      const pitch = document.getElementById('interactivePitch');
+      const svg = document.getElementById('pitchSvg');
+      const icon = document.getElementById('ballIcon');
+
+      document.querySelectorAll('.sport-tab-btn').forEach(b => {
+        b.className = 'sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition';
+      });
+
+      if (type === 'football') {
+        document.getElementById('tab-football').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
+        pitch.className = 'w-full h-44 rounded-xl border-2 border-emerald-500/40 bg-emerald-950/80 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
+        icon.className = 'fa-solid fa-futbol text-xs text-slate-900';
+        svg.innerHTML = `
+          <rect x="10" y="10" width="280" height="130" fill="none" stroke="white" stroke-width="2"/>
+          <line x1="150" y1="10" x2="150" y2="140" stroke="white" stroke-width="2"/>
+          <circle cx="150" cy="75" r="28" fill="none" stroke="white" stroke-width="2"/>
+          <rect x="10" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
+          <rect x="255" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
+        `;
+      } else if (type === 'pickleball') {
+        document.getElementById('tab-pickleball').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-teal-600 bg-teal-50 text-teal-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
+        pitch.className = 'w-full h-44 rounded-xl border-2 border-teal-500/40 bg-teal-950/90 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
+        icon.className = 'fa-solid fa-table-tennis-paddle-ball text-xs text-teal-700';
+        svg.innerHTML = `
+          <rect x="20" y="15" width="260" height="120" fill="none" stroke="white" stroke-width="2"/>
+          <line x1="150" y1="15" x2="150" y2="135" stroke="#38bdf8" stroke-width="3"/>
+          <rect x="105" y="15" width="90" height="120" fill="rgba(56, 189, 248, 0.15)" stroke="white" stroke-width="1.5"/>
+          <line x1="20" y1="75" x2="105" y2="75" stroke="white" stroke-width="1.5"/>
+          <line x1="195" y1="75" x2="280" y2="75" stroke="white" stroke-width="1.5"/>
+        `;
+      } else if (type === 'badminton') {
+        document.getElementById('tab-badminton').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-blue-600 bg-blue-50 text-blue-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
+        pitch.className = 'w-full h-44 rounded-xl border-2 border-blue-500/40 bg-blue-950/90 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
+        icon.className = 'fa-solid fa-feather text-xs text-blue-700';
+        svg.innerHTML = `
+          <rect x="20" y="15" width="260" height="120" fill="none" stroke="white" stroke-width="2"/>
+          <line x1="150" y1="15" x2="150" y2="135" stroke="white" stroke-width="3"/>
+          <line x1="35" y1="15" x2="35" y2="135" stroke="white" stroke-width="1.5"/>
+          <line x1="265" y1="15" x2="265" y2="135" stroke="white" stroke-width="1.5"/>
+          <line x1="20" y1="75" x2="280" y2="75" stroke="white" stroke-width="1"/>
+        `;
+      }
+      calcTotal();
+    }
+
+    function kickBall() {
+      const ball = document.getElementById('ballElement');
+      const randomX = Math.floor(Math.random() * 70) + 15;
+      const randomY = Math.floor(Math.random() * 55) + 20;
+      ball.style.left = `${randomX}%`;
+      ball.style.top = `${randomY}%`;
+      ball.style.transform = `scale(1.25) rotate(${Math.random() * 360}deg)`;
+      setTimeout(() => {
+        ball.style.transform = `scale(1) rotate(0deg)`;
+      }, 350);
+    }
+
+    function selectSlot(btn, hours) {
+      slotHours = hours;
+      document.querySelectorAll('.slot-pill').forEach(b => {
+        b.className = 'slot-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-700 hover:border-emerald-500 transition';
+      });
+      btn.className = 'slot-pill active p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 font-bold text-emerald-800 transition';
+      calcTotal();
+    }
+
+    function toggleAddon(price, checked) {
+      addonPrice = checked ? price : 0;
+      calcTotal();
+    }
+
+    function calcTotal() {
+      const total = (sportRate * slotHours) + addonPrice;
+      document.getElementById('calculatedPrice').innerHTML = `${total.toLocaleString('vi-VN')} <span class="text-xs font-bold text-emerald-400">VNĐ</span>`;
+    }
+
+    // 4. AI CHATBOT
+    function toggleChat() {
+      const chatWindow = document.getElementById('chatWindow');
+      chatWindow.classList.toggle('hidden');
+      if (!chatWindow.classList.contains('hidden')) {
+        document.getElementById('chatInput').focus();
+      }
+    }
+
+    function sendQuickPrompt(promptText) {
+      document.getElementById('chatInput').value = promptText;
+      document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+    }
+
+    async function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      const container = document.getElementById('chatMessages');
+
+      // User message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'flex justify-end';
+      userMsg.innerHTML = `<div class="bg-emerald-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] font-medium">${userText}</div>`;
+      container.appendChild(userMsg);
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
+
+      // Bot typing message
+      const botDiv = document.createElement('div');
+      botDiv.className = 'flex gap-2 items-start';
+      const textSpan = document.createElement('div');
+      textSpan.className = 'bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-slate-800 shadow-sm max-w-[85%] leading-relaxed typing-cursor';
+
+      botDiv.innerHTML = `<div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] shadow-sm"><i class="fa-solid fa-robot"></i></div>`;
+      botDiv.appendChild(textSpan);
+      container.appendChild(botDiv);
+      container.scrollTop = container.scrollHeight;
+
+      const reply = `Hệ thống vừa kiểm tra câu hỏi "${userText}": Hiện tại sân vẫn còn slot trống sau 18:00 hôm nay. Bạn có thể nhấn nút "Đặt Sân Nhanh" phía trên để hoàn tất giữ chỗ nhé!`;
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < reply.length) {
+          textSpan.textContent += reply.charAt(i);
+          i++;
+          container.scrollTop = container.scrollHeight;
+        } else {
+          textSpan.classList.remove('typing-cursor');
+          clearInterval(interval);
+        }
+      }, 20);
+    }
+  </script>
+</body>
+</html>

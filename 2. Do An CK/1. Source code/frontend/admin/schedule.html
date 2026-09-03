@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Đặt & Khung Giờ - SFMS Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar-transition { transition: width 0.3s ease-in-out; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans overflow-hidden">
+    <div class="flex h-screen w-full">
+        <!-- SIDEBAR CHUNG -->
+        <admin-sidebar></admin-sidebar>
+
+        <div class="flex-1 flex flex-col h-screen min-w-0">
+            <!-- HEADER CHUNG -->
+            <admin-header title="Lịch Đặt & Khung Giờ"></admin-header>
+
+            <!-- VÙNG NỘI DUNG CHÍNH (GIỮ NGUYÊN HOÀN TOÀN) -->
+            <main class="flex-1 bg-gray-50 overflow-y-auto p-6 relative">
+                <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
+                    <!-- HEADER -->
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-4 border-b pb-4 gap-4">
+                        <h1 class="text-xl font-bold text-gray-800 uppercase">
+                            <i class="fa-solid fa-calendar-days mr-2 text-blue-600"></i>Điều Phối Lịch Sân
+                        </h1>
+                        <div class="flex items-center space-x-3">
+                            <div class="flex flex-col">
+                                <label class="text-xs font-semibold text-gray-500 uppercase">Ngày xem lịch</label>
+                                <input type="date" id="filterDate" onchange="fetchData()" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 font-medium cursor-pointer">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-xs font-semibold text-gray-500 uppercase">Loại sân</label>
+                                <select id="filterType" onchange="applyFilters()" class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-blue-500 font-medium cursor-pointer">
+                                    <option value="all">-- Tất cả --</option>
+                                    <option value="Bóng đá">Bóng đá</option>
+                                    <option value="Cầu lông">Cầu lông</option>
+                                    <option value="Tennis">Tennis</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CHÚ THÍCH & PHÂN TRANG -->
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+                        <div class="flex space-x-4 text-sm font-medium">
+                            <div class="flex items-center"><span class="w-4 h-4 bg-gray-300 rounded-sm mr-2 shadow-sm border border-gray-400"></span> Đã qua giờ</div>
+                            <div class="flex items-center"><span class="w-4 h-4 bg-green-500 rounded-sm mr-2 shadow-sm"></span> Còn trống</div>
+                            <div class="flex items-center"><span class="w-4 h-4 bg-red-500 rounded-sm mr-2 shadow-sm"></span> Đã đặt</div>
+                            <div class="flex items-center"><span class="w-4 h-4 bg-yellow-500 rounded-sm mr-2 shadow-sm"></span> Đang chơi</div>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-4 md:mt-0">
+                            <button onclick="prevPage()" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-semibold transition"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span id="pageIndicator" class="text-sm font-medium text-gray-600">Trang 1 / 1</span>
+                            <button onclick="nextPage()" class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-semibold transition"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- BẢNG MA TRẬN CHÉO -->
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 no-scrollbar">
+                        <table class="min-w-full bg-white text-sm table-fixed w-full">
+                            <thead>
+                                <tr id="table-header" class="bg-gray-100 border-b text-center font-semibold text-gray-700">
+                                    <th class="py-3 px-4 border-r w-32 sticky left-0 bg-gray-100 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Khung giờ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 1. POPUP: ĐẶT SÂN / VÃNG LAI -->
+                <div id="bookingModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center backdrop-blur-sm">
+                    <div class="p-6 border w-96 shadow-xl rounded-xl bg-white">
+                        <div class="flex justify-between items-center border-b pb-3 mb-4">
+                            <h3 class="text-lg font-bold text-gray-900">Mở Đơn Đặt Sân</h3>
+                            <button onclick="closeBookingModal()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-4">Khung giờ: <strong id="bookingTime" class="text-blue-600"></strong> tại <strong id="bookingCourt" class="text-gray-800"></strong></p>
+
+                        <form id="bookingForm" onsubmit="confirmBooking(event)">
+                            <input type="hidden" id="bookingCourtId">
+                            <div class="mb-3">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Tên khách hàng *</label>
+                                <input type="text" id="customerName" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500" placeholder="Nhập tên khách...">
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Số điện thoại *</label>
+                                <input type="text" id="customerPhone" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500" placeholder="Nhập SĐT...">
+                            </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Loại hình đặt</label>
+                                <select id="bookingStatus" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 font-medium">
+                                    <option value="booked">Khách đặt trước</option>
+                                    <option value="playing">Khách vào chơi luôn</option>
+                                </select>
+                            </div>
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="closeBookingModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg">Hủy</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md">Tạo Đơn</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 2. POPUP: CHI TIẾT & HÀNH ĐỘNG -->
+                <div id="detailModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full z-50 flex items-center justify-center backdrop-blur-sm">
+                    <div class="p-6 border w-[400px] shadow-xl rounded-xl bg-white">
+                        <div class="flex justify-between items-center border-b pb-3 mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Quản lý Booking</h3>
+                            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+                        </div>
+                        <div class="space-y-3 text-sm text-gray-600 mb-6">
+                            <div class="flex justify-between"><span class="font-medium">Mã Đơn:</span> <span id="detailCode" class="font-bold text-blue-600"></span></div>
+                            <div class="flex justify-between"><span class="font-medium">Khách hàng:</span> <span id="detailName" class="font-semibold text-gray-900"></span></div>
+                            <div class="flex justify-between"><span class="font-medium">SĐT:</span> <span id="detailPhone" class="font-semibold text-gray-900"></span></div>
+                            <div class="flex justify-between"><span class="font-medium">Trạng thái:</span> <span id="detailStatus" class="px-2 py-0.5 rounded text-xs font-bold"></span></div>
+                        </div>
+
+                        <div class="flex flex-col space-y-3">
+                            <button id="btnCheckIn" onclick="updateBookingStatus('playing')" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 rounded-lg shadow-md transition hidden">
+                                <i class="fa-solid fa-check-to-slot mr-1"></i> Khách Vào Chơi
+                            </button>
+                            <button id="btnComplete" onclick="completeBooking()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-lg shadow-md transition hidden">
+                                <i class="fa-solid fa-check mr-1"></i> Hoàn Thành
+                            </button>
+                            <button id="btnCancelBooking" onclick="cancelBooking()" class="w-full bg-gray-100 hover:bg-red-100 text-red-600 font-semibold py-2.5 rounded-lg transition hidden">
+                                Hủy Đơn
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Nạp Layout & Logic JS -->
+    <script src="/assets/js/config.js"></script>
+    <script src="/admin/assets/js/layout.js"></script>
+    <script src="/admin/assets/js/schedule.js"></script>
+</body>
+</html>
