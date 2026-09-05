@@ -26,7 +26,7 @@ function closeEditModal() {
 
 async function fetchAndRenderServices() {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetchWithAuth(API_URL);
         if (response.ok) {
             allServicesData = await response.json();
             renderTable();
@@ -107,7 +107,7 @@ async function submitNewService(event) {
     };
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetchWithAuth(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -130,7 +130,7 @@ async function submitEditService(event) {
     };
 
     try {
-        const response = await fetch(`${API_URL}${serviceId}`, {
+        const response = await fetchWithAuth(`${API_URL}${serviceId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -145,7 +145,7 @@ async function submitEditService(event) {
 
 async function toggleAvailable(serviceId, checkbox) {
     try {
-        const response = await fetch(`${API_URL}${serviceId}`, {
+        const response = await fetchWithAuth(`${API_URL}${serviceId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ is_available: checkbox.checked })

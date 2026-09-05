@@ -22,13 +22,13 @@ function setDefaultDate() {
 async function fetchData() {
     const selectedDate = document.getElementById('filterDate').value;
     try {
-        const resCourts = await fetch(API_COURTS);
+        const resCourts = await fetchWithAuth(API_COURTS);
         if (resCourts.ok) allCourts = (await resCourts.json()).filter(c => c.is_active === true);
     } catch (e) {}
 
     if (allCourts.length > 0 && selectedDate) {
         try {
-            const resSchedule = await fetch(`${API_BOOKINGS}/schedule?date=${selectedDate}`);
+            const resSchedule = await fetchWithAuth(`${API_BOOKINGS}/schedule?date=${selectedDate}`);
             if (resSchedule.ok) bookedSlots = await resSchedule.json();
             else bookedSlots = [];
         } catch (e) { bookedSlots = []; }
@@ -127,7 +127,7 @@ async function confirmBooking(event) {
     };
 
     try {
-        const res = await fetch(`${API_BOOKINGS}/`, {
+        const res = await fetchWithAuth(`${API_BOOKINGS}/`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
         });
         if (res.ok) { closeBookingModal(); fetchData(); }
@@ -172,7 +172,7 @@ function closeDetailModal() {
 
 async function updateBookingStatus(newStatus) {
     try {
-        const res = await fetch(`${API_BOOKINGS}/${currentSlotInfo.booking_code}/status`, {
+        const res = await fetchWithAuth(`${API_BOOKINGS}/${currentSlotInfo.booking_code}/status`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus })
@@ -185,7 +185,7 @@ async function updateBookingStatus(newStatus) {
 async function completeBooking() {
     if(confirm("Hoàn thành đơn.")) {
         try {
-            const res = await fetch(`${API_BOOKINGS}/${currentSlotInfo.booking_code}`, { method: 'DELETE' });
+            const res = await fetchWithAuth(`${API_BOOKINGS}/${currentSlotInfo.booking_code}`, { method: 'DELETE' });
             if(res.ok) { closeDetailModal(); fetchData(); }
         } catch (e) { alert("Lỗi kết nối"); }
     }
@@ -194,7 +194,7 @@ async function completeBooking() {
 async function cancelBooking() {
     if(confirm("Xác nhận KHÁCH KHÔNG ĐẾN hoặc HỦY?")) {
         try {
-            const res = await fetch(`${API_BOOKINGS}/${currentSlotInfo.booking_code}`, { method: 'DELETE' });
+            const res = await fetchWithAuth(`${API_BOOKINGS}/${currentSlotInfo.booking_code}`, { method: 'DELETE' });
             if(res.ok) { closeDetailModal(); fetchData(); }
         } catch (e) { alert("Lỗi mạng!"); }
     }

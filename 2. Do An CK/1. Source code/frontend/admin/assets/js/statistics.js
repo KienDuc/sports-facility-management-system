@@ -4,7 +4,7 @@ const statusLabels = { pending: 'Chờ xác nhận', booked: 'Đã đặt', conf
 const statusColors = { pending: 'bg-amber-500', booked: 'bg-blue-500', confirmed: 'bg-green-500', playing: 'bg-purple-500', completed: 'bg-emerald-500', canceled: 'bg-red-500', cancelled: 'bg-red-500' };
 
 async function fetchJson(path) {
-    const response = await fetch(`${API_BASE_URL}${path}`);
+    const response = await fetchWithAuth(`${API_BASE_URL}${path}`);
     if (!response.ok) throw new Error(`API trả về lỗi ${response.status}`);
     return response.json();
 }
@@ -45,17 +45,17 @@ async function loadRevenue() {
 async function loadStatuses() {
     const data = await fetchJson('/booking-status');
     const total = data.reduce((sum, item) => sum + item.count, 0) || 1;
-    document.getElementById('statusList').innerHTML = data.length ? data.map(item => `<div><div class="flex justify-between text-sm mb-1"><span>${statusLabels[item.status] || item.status}</span><strong>${item.count}</strong></div><div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div class="h-full ${statusColors[item.status] || 'bg-gray-500'}" style="width:${item.count / total * 100}%"></div></div></div>`).join('') : '<p class="text-sm text-gray-400">Chưa có đơn đặt sân.</p>';
+    document.getElementById('statusList').innerHTML = data.length ? data.map(item => `<div><div class="flex justify-between text-sm mb-1"><span>${statusLabels[item.status] || item.status}</span><strong>${item.count}</strong></div><div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div class="h-full ${statusColors[item.status] || 'bg-gray-500'}" style="width:${item.count / total * 100}%"></div></div></div>`).join('') : '<p class="text-sm text-gray-400 text-sm font-medium">Chưa có đơn đặt sân.</p>';
 }
 
 async function loadTopCourts() {
     const data = await fetchJson('/top-courts');
-    document.getElementById('topCourts').innerHTML = data.length ? data.map(item => `<tr class="border-t border-gray-100 hover:bg-gray-50"><td class="px-5 py-4 font-semibold">${item.court_name}</td><td class="px-5 py-4 text-gray-500">${item.court_type}</td><td class="px-5 py-4 text-center">${item.booking_count}</td><td class="px-5 py-4 text-right font-medium">${money.format(item.revenue)}</td></tr>`).join('') : '<tr><td colspan="4" class="px-5 py-6 text-center text-gray-400">Chưa có dữ liệu đặt sân.</td></tr>';
+    document.getElementById('topCourts').innerHTML = data.length ? data.map(item => `<tr class="border-t border-gray-100 hover:bg-gray-50"><td class="px-5 py-4 font-semibold">${item.court_name}</td><td class="px-5 py-4 text-gray-500">${item.court_type}</td><td class="px-5 py-4 text-center">${item.booking_count}</td><td class="px-5 py-4 text-right font-medium">${money.format(item.revenue)}</td></tr>`).join('') : '<tr><td colspan="4" class="px-5 py-6 text-center text-gray-400 text-sm font-medium">Chưa có dữ liệu đặt sân.</td></tr>';
 }
 
 async function loadTopServices() {
     const data = await fetchJson('/top-services');
-    document.getElementById('topServices').innerHTML = data.length ? data.map(item => `<tr class="border-t border-gray-100 hover:bg-gray-50"><td class="px-5 py-4 font-semibold">${item.service_name}</td><td class="px-5 py-4 text-center">${item.quantity}</td><td class="px-5 py-4 text-right font-medium">${money.format(item.revenue)}</td></tr>`).join('') : '<tr><td colspan="3" class="px-5 py-6 text-center text-gray-400">Chưa có dữ liệu dịch vụ.</td></tr>';
+    document.getElementById('topServices').innerHTML = data.length ? data.map(item => `<tr class="border-t border-gray-100 hover:bg-gray-50"><td class="px-5 py-4 font-semibold">${item.service_name}</td><td class="px-5 py-4 text-center">${item.quantity}</td><td class="px-5 py-4 text-right font-medium">${money.format(item.revenue)}</td></tr>`).join('') : '<tr><td colspan="3" class="px-5 py-6 text-center text-gray-400 text-sm font-medium">Chưa có dữ liệu dịch vụ.</td></tr>';
 }
 
 async function loadDashboard() {

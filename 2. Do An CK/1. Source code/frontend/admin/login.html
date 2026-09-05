@@ -9,13 +9,15 @@
   <!-- FontAwesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
     .bg-grid-pattern {
       background-image: radial-gradient(#e2e8f0 1.2px, transparent 1.2px);
       background-size: 24px 24px;
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased bg-grid-pattern min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-50 text-slate-800 antialiased bg-grid-pattern min-h-screen flex items-center justify-center p-4">
 
   <div class="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl p-8 sm:p-10 relative overflow-hidden">
 
@@ -33,14 +35,18 @@
             <i class="fa-solid fa-futbol text-2xl"></i>
           </div>
         </div>
-        <span class="text-2xl font-black tracking-tight text-slate-900">SFMS<span class="text-emerald-600">.</span></span>
+        <span class="text-2xl font-extrabold tracking-tight text-slate-900">ELITE SPORT<span class="text-emerald-600">.</span></span>
       </a>
-      <h1 class="text-xl font-black text-slate-900">Đăng Nhập Hệ Thống</h1>
+      <h1 class="text-xl font-bold text-slate-900">Đăng Nhập Hệ Thống</h1>
       <p class="text-xs text-slate-500 mt-1">Truy cập bảng điều khiển và quản lý trung tâm thể thao</p>
     </div>
 
+    <div id="errorMessage" class="hidden mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-xs font-bold text-center">
+      Tài khoản hoặc mật khẩu không chính xác!
+    </div>
+
     <!-- Login Form -->
-    <form method="POST" action="/login" class="space-y-5">
+    <form id="loginForm" class="space-y-5">
 
       <!-- Username / Account -->
       <div>
@@ -83,7 +89,7 @@
       <!-- Remember Me -->
       <div class="flex items-center text-xs">
         <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-600 select-none">
-          <input type="checkbox" name="remember" checked class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+          <input type="checkbox" id="rememberMe" name="remember" checked class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
           <span>Ghi nhớ phiên đăng nhập</span>
         </label>
       </div>
@@ -91,9 +97,10 @@
       <!-- Submit Button -->
       <button
         type="submit"
-        class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition duration-200 flex items-center justify-center gap-2"
+        id="submitBtn"
+        class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+        <i class="fa-solid fa-right-to-bracket"></i>Đăng Nhập
       </button>
     </form>
 
@@ -106,19 +113,21 @@
 
   </div>
 
-  <!-- Toggle Password Script -->
-  <script>
-    function togglePasswordVisibility() {
-      const pass = document.getElementById('passwordInput');
-      const icon = document.getElementById('eyeIcon');
-      if (pass.type === 'password') {
-        pass.type = 'text';
-        icon.className = 'fa-regular fa-eye-slash';
-      } else {
-        pass.type = 'password';
-        icon.className = 'fa-regular fa-eye';
-      }
-    }
-  </script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/admin/assets/js/login.js"></script>
+<!--  &lt;!&ndash; Toggle Password Script &ndash;&gt;-->
+<!--  <script>-->
+<!--    function togglePasswordVisibility() {-->
+<!--      const pass = document.getElementById('passwordInput');-->
+<!--      const icon = document.getElementById('eyeIcon');-->
+<!--      if (pass.type === 'password') {-->
+<!--        pass.type = 'text';-->
+<!--        icon.className = 'fa-regular fa-eye-slash';-->
+<!--      } else {-->
+<!--        pass.type = 'password';-->
+<!--        icon.className = 'fa-regular fa-eye';-->
+<!--      }-->
+<!--    }-->
+<!--  </script>-->
 </body>
 </html>

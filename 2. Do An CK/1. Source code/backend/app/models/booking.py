@@ -15,6 +15,9 @@ class Booking(Base):
     status = Column(String(20), default="confirmed")  # confirmed, completed, cancelled
     note = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    created_by = Column(String(50), nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_by = Column(String(50), nullable=True)
 
     slots = relationship("BookingSlot", back_populates="booking", cascade="all, delete-orphan")
     services = relationship("BookingService", back_populates="booking", cascade="all, delete-orphan")

@@ -8,13 +8,18 @@ from backend.app.db.session import get_db
 from backend.app.models.booking import Booking, BookingService, BookingSlot
 from backend.app.models.court import Court
 from backend.app.models.service import Service
+from backend.app.api.v1.deps import get_current_active_admin, get_current_user
+from backend.app.models.user import User
 
 
-router = APIRouter(prefix="/statistics", tags=["Statistics"])
+router = APIRouter(tags=["Statistics"])
 
 
 @router.get("/overview")
-def get_overview(db: Session = Depends(get_db)):
+def get_overview(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
+):
     today = date.today().isoformat()
     cancel_statuses = ["canceled", "cancelled"]
 
@@ -66,6 +71,7 @@ def get_overview(db: Session = Depends(get_db)):
 def get_revenue(
     days: int = Query(default=7, ge=1, le=90),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
 ):
     cancel_statuses = ["canceled", "cancelled"]
     result = []
@@ -90,7 +96,10 @@ def get_revenue(
 
 
 @router.get("/booking-status")
-def get_booking_status(db: Session = Depends(get_db)):
+def get_booking_status(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
+):
     rows = (
         db.query(Booking.status, func.count(Booking.id))
         .group_by(Booking.status)
@@ -111,6 +120,7 @@ def get_booking_status(db: Session = Depends(get_db)):
 def get_top_courts(
     limit: int = Query(default=5, ge=1, le=20),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
 ):
     cancel_statuses = ["canceled", "cancelled"]
 
@@ -148,6 +158,7 @@ def get_top_courts(
 def get_top_services(
     limit: int = Query(default=5, ge=1, le=20),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
 ):
     cancel_statuses = ["canceled", "cancelled"]
 

@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thống kê nhanh - SFMS Admin</title>
+    <title>Thống kê nhanh - Elite Sport Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans overflow-hidden">
+<body class="bg-gray-50 text-gray-800 overflow-hidden">
     <div class="flex h-screen w-full">
         <!-- SIDEBAR CHUNG -->
         <admin-sidebar></admin-sidebar>
@@ -30,8 +35,8 @@
                             <option value="14">14 ngày gần đây</option>
                             <option value="30">30 ngày gần đây</option>
                         </select>
-                        <button onclick="loadDashboard()" class="bg-green-600 hover:bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold shadow-sm">
-                            <i class="fa-solid fa-rotate-right mr-2"></i>Làm mới
+                        <button onclick="loadDashboard()" class="w-24 bg-emerald-600 hover:bg-green-700 text-white rounded-lg px-4 py-2 text-sm font-semibold shadow-sm">
+                            Làm mới
                         </button>
                     </div>
                 </section>
@@ -41,25 +46,25 @@
                 <section id="overviewCards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                     <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                         <div class="flex items-start justify-between">
-                            <div><p class="text-sm text-gray-500">Tổng số sân</p><p id="totalCourts" class="text-3xl font-bold mt-2">--</p><p id="activeCourts" class="text-xs text-green-600 mt-2">Đang tải...</p></div>
+                            <div><p class="text-sm font-medium text-gray-500">Tổng số sân</p><p id="totalCourts" class="text-3xl font-bold mt-2">--</p><p id="activeCourts" class="text-xs font-medium text-green-600 mt-2">Đang tải...</p></div>
                             <span class="w-11 h-11 rounded-xl bg-green-100 text-green-600 flex items-center justify-center"><i class="fa-solid fa-futbol text-xl"></i></span>
                         </div>
                     </article>
                     <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                         <div class="flex items-start justify-between">
-                            <div><p class="text-sm text-gray-500">Đơn hôm nay</p><p id="todayBookings" class="text-3xl font-bold mt-2">--</p><p id="totalBookings" class="text-xs text-gray-500 mt-2">Đang tải...</p></div>
+                            <div><p class="text-sm font-medium text-gray-500">Đơn hôm nay</p><p id="todayBookings" class="text-3xl font-bold mt-2">--</p><p id="totalBookings" class="text-xs font-medium text-gray-500 mt-2">Đang tải...</p></div>
                             <span class="w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-calendar-check text-xl"></i></span>
                         </div>
                     </article>
                     <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                         <div class="flex items-start justify-between">
-                            <div><p class="text-sm text-gray-500">Doanh thu hôm nay</p><p id="todayRevenue" class="text-2xl font-bold mt-2">--</p><p class="text-xs text-gray-500 mt-2">Không tính đơn đã hủy</p></div>
+                            <div><p class="text-sm font-medium text-gray-500">Doanh thu hôm nay</p><p id="todayRevenue" class="text-3xl font-bold mt-2">--</p><p class="text-xs font-medium text-gray-500 mt-2">Không tính đơn đã hủy</p></div>
                             <span class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-coins text-xl"></i></span>
                         </div>
                     </article>
                     <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                         <div class="flex items-start justify-between">
-                            <div><p class="text-sm text-gray-500">Đơn chờ xử lý</p><p id="pendingBookings" class="text-3xl font-bold mt-2">--</p><p id="bookingSummary" class="text-xs text-gray-500 mt-2">Đang tải...</p></div>
+                            <div><p class="text-sm font-medium text-gray-500">Đơn chờ xử lý</p><p id="pendingBookings" class="text-3xl font-bold mt-2">--</p><p id="bookingSummary" class="text-xs font-medium text-gray-500 mt-2">Đang tải...</p></div>
                             <span class="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-hourglass-half text-xl"></i></span>
                         </div>
                     </article>
@@ -68,35 +73,48 @@
                 <section class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
                     <article class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                         <div class="flex items-center justify-between mb-5">
-                            <div><h2 class="font-bold text-gray-900">Doanh thu theo ngày</h2><p class="text-xs text-gray-500 mt-1">Đơn vị: VNĐ</p></div>
+                            <div><h2 class="text-sm font-bold text-gray-900">Doanh thu theo ngày</h2><p class="text-xs font-medium text-gray-500 mt-1">Đơn vị: VNĐ</p></div>
                             <p id="periodRevenue" class="font-bold text-green-600"></p>
                         </div>
                         <div id="revenueChart" class="h-64 flex items-end gap-2 border-b border-gray-200"></div>
                     </article>
 
                     <article class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                        <h2 class="font-bold text-gray-900 mb-5">Trạng thái đơn đặt</h2>
+                        <h2 class="text-sm font-bold text-gray-900 mb-5">Trạng thái đơn đặt</h2>
                         <div id="statusList" class="space-y-4"><p class="text-sm text-gray-400">Đang tải...</p></div>
                     </article>
                 </section>
 
                 <section class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="p-5 border-b border-gray-100"><h2 class="font-bold text-gray-900">Sân được đặt nhiều nhất</h2></div>
+                        <div class="p-5 border-b border-gray-100"><h2 class="text-sm font-bold text-gray-900">Sân được đặt nhiều nhất</h2></div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
-                                <thead class="bg-gray-50 text-gray-500 text-left"><tr><th class="px-5 py-3">Sân</th><th class="px-5 py-3">Loại</th><th class="px-5 py-3 text-center">Lượt đặt</th><th class="px-5 py-3 text-right">Doanh thu</th></tr></thead>
-                                <tbody id="topCourts"><tr><td colspan="4" class="px-5 py-6 text-center text-gray-400">Đang tải...</td></tr></tbody>
+                                <thead class="bg-gray-50 text-gray-500 text-left">
+                                    <tr>
+                                        <th class="px-5 py-3 w-32 text-sm font-medium">Sân</th>
+                                        <th class="px-5 py-3 w-24 text-sm font-medium">Loại</th>
+                                        <th class="px-5 py-3 w-16 text-center text-sm font-medium">Lượt đặt</th>
+                                        <th class="px-5 py-3 w-32 text-right text-sm font-medium">Doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topCourts"><tr><td colspan="4" class="px-5 py-6 text-center text-gray-400 text-sm font-medium">Đang tải...</td></tr></tbody>
                             </table>
                         </div>
                     </article>
 
                     <article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="p-5 border-b border-gray-100"><h2 class="font-bold text-gray-900">Dịch vụ được dùng nhiều nhất</h2></div>
+                        <div class="p-5 border-b border-gray-100"><h2 class="text-sm font-bold text-gray-900">Dịch vụ được dùng nhiều nhất</h2></div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm">
-                                <thead class="bg-gray-50 text-gray-500 text-left"><tr><th class="px-5 py-3">Dịch vụ</th><th class="px-5 py-3 text-center">Số lượng</th><th class="px-5 py-3 text-right">Doanh thu</th></tr></thead>
-                                <tbody id="topServices"><tr><td colspan="3" class="px-5 py-6 text-center text-gray-400">Đang tải...</td></tr></tbody>
+                                <thead class="bg-gray-50 text-gray-500 text-left">
+                                    <tr>
+                                        <th class="px-5 py-3 w-32 text-sm font-medium">Dịch vụ</th>
+                                        <th class="px-5 py-3 w-24 text-center text-sm font-medium">Số lượng</th>
+                                        <th class="px-5 py-3 w-32 text-right text-sm font-medium">Doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topServices"><tr><td colspan="3" class="px-5 py-6 text-center text-gray-400 text-sm font-medium">Đang tải...</td></tr></tbody>
                             </table>
                         </div>
                     </article>
@@ -107,6 +125,7 @@
 
     <!-- Nạp Layout & Logic JS -->
     <script src="/assets/js/config.js"></script>
+    <script src="/assets/js/auth.js"></script>
     <script src="/admin/assets/js/layout.js"></script>
     <script src="/admin/assets/js/statistics.js"></script>
 </body>

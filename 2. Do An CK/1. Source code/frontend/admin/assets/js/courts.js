@@ -26,7 +26,7 @@ function closeEditModal() {
 
 async function fetchAndRenderCourts() {
     try {
-        const response = await fetch(API_URL);
+        const response = await fetchWithAuth(API_URL);
         if (response.ok) {
             allCourtsData = await response.json();
             renderTable();
@@ -107,7 +107,7 @@ async function submitNewCourt(event) {
     };
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetchWithAuth(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -130,7 +130,7 @@ async function submitEditCourt(event) {
     };
 
     try {
-        const response = await fetch(`${API_URL}${courtId}`, {
+        const response = await fetchWithAuth(`${API_URL}${courtId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -145,7 +145,7 @@ async function submitEditCourt(event) {
 
 async function toggleActive(courtId, checkbox) {
     try {
-        const response = await fetch(`${API_URL}${courtId}`, {
+        const response = await fetchWithAuth(`${API_URL}${courtId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ is_active: checkbox.checked })

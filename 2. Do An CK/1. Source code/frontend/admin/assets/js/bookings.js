@@ -17,7 +17,7 @@ async function fetchAndRenderBookings() {
     if (dateTo) params.append('date_to', dateTo);
 
     try {
-        const response = await fetch(`${API_URL}?${params.toString()}`);
+        const response = await fetchWithAuth(`${API_URL}?${params.toString()}`);
         if (response.ok) {
             allBookingsData = await response.json();
             currentPage = 1;

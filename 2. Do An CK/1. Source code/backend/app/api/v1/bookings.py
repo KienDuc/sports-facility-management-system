@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from backend.app.db.session import get_db
 from backend.app.models.booking import Booking, BookingSlot
 from backend.app.models.court import Court
+from backend.app.api.v1.deps import get_current_user
+from backend.app.models.user import User
 
 router = APIRouter(tags=["Bookings"])
 
@@ -32,6 +34,7 @@ def get_bookings(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     query = db.query(Booking)
 
@@ -70,6 +73,9 @@ def get_bookings(
             "status": booking.status,
             "note": booking.note,
             "created_at": booking.created_at.isoformat() if booking.created_at else None,
+            "created_by": booking.created_by,
+            "updated_at": booking.updated_at.isoformat() if booking.updated_at else None,
+            "updated_by": booking.updated_by,
             "slots": [
                 {
                     "court_id": slot.court_id,
@@ -124,7 +130,11 @@ def get_schedule(date: str, db: Session = Depends(get_db)):
 
 # --- 2. API: TẠO ĐƠN ĐẶT SÂN (NHẬP THÔNG TIN KHÁCH) ---
 @router.post("/")
-def create_booking(data: BookingCreate, db: Session = Depends(get_db)):
+def create_booking(
+    data: BookingCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     # Kiểm tra sân
     court = db.query(Court).filter(Court.id == data.court_id).first()
     if not court:
@@ -141,7 +151,8 @@ def create_booking(data: BookingCreate, db: Session = Depends(get_db)):
         booking_date=data.booking_date,
         total_price=court.price_per_hour,
         status=data.status,
-        note="Admin đặt trực tiếp từ hệ thống"
+        note="Admin đặt trực tiếp từ hệ thống",
+        created_by=current_user.username
     )
     db.add(new_booking)
     db.commit()
@@ -164,12 +175,18 @@ def create_booking(data: BookingCreate, db: Session = Depends(get_db)):
 
 # --- 3. API: CẬP NHẬT TRẠNG THÁI (ĐỎ -> VÀNG) ---
 @router.patch("/{booking_code}/status")
-def update_booking_status(booking_code: str, data: BookingStatusUpdate, db: Session = Depends(get_db)):
+def update_booking_status(
+    booking_code: str,
+    data: BookingStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     booking = db.query(Booking).filter(Booking.booking_code == booking_code).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Không tìm thấy đơn đặt")
 
     booking.status = data.status
+    booking.updated_by = current_user.username
     db.commit()
 
     return {"message": f"Đã cập nhật trạng thái thành {data.status}"}
@@ -177,7 +194,11 @@ def update_booking_status(booking_code: str, data: BookingStatusUpdate, db: Sess
 
 # --- 4. API: HỦY ĐƠN ĐẶT SÂN (TRẢ LẠI Ô TRỐNG XANH) ---
 @router.delete("/{booking_code}")
-def cancel_booking(booking_code: str, db: Session = Depends(get_db)):
+def cancel_booking(
+    booking_code: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     booking = db.query(Booking).filter(Booking.booking_code == booking_code).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Không tìm thấy đơn đặt")
@@ -187,6 +208,7 @@ def cancel_booking(booking_code: str, db: Session = Depends(get_db)):
 
     # 2. VẪN GIỮ LẠI đơn đặt chính (Booking) nhưng đổi status thành 'canceled' để lưu lịch sử
     booking.status = "canceled"
+    booking.updated_by = current_user.username
     db.commit()
 
     return {"message": "Đã hủy đơn thành công"}

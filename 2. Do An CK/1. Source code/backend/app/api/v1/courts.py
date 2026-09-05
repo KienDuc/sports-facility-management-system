@@ -6,8 +6,10 @@ from backend.app.db.session import get_db
 from backend.app.models.court import Court
 from backend.app.models.time_slot import TimeSlot
 from backend.app.schemas.court import CourtCreate, CourtResponse, CourtUpdate
+from backend.app.api.v1.deps import get_current_active_admin, get_current_user
+from backend.app.models.user import User
 
-router = APIRouter(prefix="/courts", tags=["Courts"])
+router = APIRouter(tags=["Courts"])
 
 # Danh sách 16 khung giờ chuẩn cố định sẵn
 DEFAULT_HOURS = [
@@ -30,13 +32,23 @@ DEFAULT_HOURS = [
 ]
 
 @router.get("/", response_model=List[CourtResponse])
-def get_courts(db: Session = Depends(get_db)):
+def get_courts(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     return db.query(Court).all()
 
 @router.post("/", response_model=CourtResponse, status_code=status.HTTP_201_CREATED)
-def create_court(court_in: CourtCreate, db: Session = Depends(get_db)):
+def create_court(
+    court_in: CourtCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
+):
+    court_data = court_in.model_dump()
+    court_data["created_by"] = current_user.username
+
     # 1. Tạo sân mới
-    new_court = Court(**court_in.model_dump())
+    new_court = Court(**court_data)
     db.add(new_court)
     db.commit()
     db.refresh(new_court)
@@ -83,7 +95,12 @@ def create_court(court_in: CourtCreate, db: Session = Depends(get_db)):
 #         raise HTTPException(status_code=500, detail=f"Lỗi hệ thống: {str(e)}")
 
 @router.patch("/{court_id}", response_model=CourtResponse)
-def update_court(court_id: int, court_in: CourtUpdate, db: Session = Depends(get_db)):
+def update_court(
+    court_id: int,
+    court_in: CourtUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_admin)
+):
         # Tìm sân theo ID
         court = db.query(Court).filter(Court.id == court_id).first()
         if not court:
@@ -98,6 +115,8 @@ def update_court(court_id: int, court_in: CourtUpdate, db: Session = Depends(get
         # Cập nhật vào database
         for key, value in update_data.items():
             setattr(court, key, value)
+
+        court.updated_by = current_user.username
 
         db.commit()
         db.refresh(court)

@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Sân - SFMS Admin</title>
+    <title>Quản Lý Sân - Elite Sport Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans overflow-hidden">
+<body class="bg-gray-100 text-gray-800 overflow-hidden">
     <div class="flex h-screen w-full">
         <!-- SIDEBAR CHUNG -->
         <admin-sidebar></admin-sidebar>
@@ -20,11 +25,11 @@
             <main class="flex-1 bg-gray-50 overflow-y-auto p-6 relative">
                 <div class="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-xl font-bold text-gray-800">
-                            <i class="fa-solid fa-layer-group mr-2 text-blue-600"></i>Danh Sách Sân
+                        <h1 class="text-xl font-bold text-gray-800 uppercase">
+                            <i class="fa-solid fa-layer-group mr-2 text-emerald-600"></i>Quản lý Sân
                         </h1>
-                        <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded shadow transition">
-                            + Thêm Sân Mới
+                        <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded shadow transition">
+                            Thêm Sân Mới
                         </button>
                     </div>
 
@@ -32,13 +37,13 @@
                         <div class="overflow-x-auto">
                             <table class="min-w-full bg-white text-sm">
                                 <thead>
-                                    <tr class="bg-gray-50 border-b text-left font-semibold text-gray-600">
-                                        <th class="py-3 px-4 w-16">ID</th>
-                                        <th class="py-3 px-6">Tên Sân</th>
-                                        <th class="py-3 px-6 w-32">Loại</th>
-                                        <th class="py-3 px-6 w-40">Giá/Giờ</th>
-                                        <th class="py-3 px-6 text-center w-32">Hoạt Động</th>
-                                        <th class="py-3 px-6 text-center w-24">Thao Tác</th>
+                                    <tr class="bg-gray-50 border-b text-left font-medium text-gray-600">
+                                        <th class="py-3 px-4 w-16 text-sm font-medium">ID</th>
+                                        <th class="py-3 px-6 w-40 text-sm font-medium">Tên Sân</th>
+                                        <th class="py-3 px-6 w-40 text-sm font-medium">Loại</th>
+                                        <th class="py-3 px-6 w-24 text-sm font-medium">Giá/Giờ</th>
+                                        <th class="py-3 px-6 text-center w-24 text-sm font-medium">Hoạt Động</th>
+                                        <th class="py-3 px-6 text-center w-24 text-sm font-medium">Thao Tác</th>
                                     </tr>
                                 </thead>
                                 <tbody id="court-list"></tbody>
@@ -49,8 +54,8 @@
                         <div class="flex justify-between items-center p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
                             <span id="page-info" class="text-sm text-gray-600 font-medium"></span>
                             <div class="flex space-x-2">
-                                <button onclick="prevPage()" class="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 rounded shadow-sm text-sm font-semibold transition text-gray-700">Trước</button>
-                                <button onclick="nextPage()" class="px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 rounded shadow-sm text-sm font-semibold transition text-gray-700">Sau</button>
+                                <button onclick="prevPage()" class="w-24 px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 rounded shadow-sm text-sm font-medium transition text-gray-700">Trước</button>
+                                <button onclick="nextPage()" class="w-24 px-4 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 rounded shadow-sm text-sm font-medium transition text-gray-700">Sau</button>
                             </div>
                         </div>
                     </div>
@@ -63,11 +68,11 @@
                             <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4">Thêm Sân Thể Thao Mới</h3>
                             <form id="addCourtForm" onsubmit="submitNewCourt(event)" class="text-left">
                                 <div class="mb-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Tên Sân</label>
-                                    <input type="text" id="addCourtName" required class="w-full border border-gray-300 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên Sân</label>
+                                    <input type="text" id="addCourtName" required placeholder="Vui lòng nhập tên sân" class="w-full border border-gray-300 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Loại Sân</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Loại Sân</label>
                                     <select id="addCourtType" class="w-full border border-gray-300 rounded-md py-2 px-3 sm:text-sm focus:ring-blue-500 font-medium">
                                         <option value="Bóng đá">Bóng đá</option>
                                         <option value="Cầu lông">Cầu lông</option>
@@ -75,12 +80,12 @@
                                     </select>
                                 </div>
                                 <div class="mb-6">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Giá thuê (VNĐ/Giờ)</label>
-                                    <input type="number" id="addCourtPrice" required min="1" class="w-full border border-gray-300 rounded-md py-2 px-3 sm:text-sm focus:ring-blue-500">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Giá thuê (VNĐ/Giờ)</label>
+                                    <input type="number" id="addCourtPrice" required min="1" placeholder="0" class="w-full border border-gray-300 rounded-md py-2 px-3 sm:text-sm focus:ring-blue-500">
                                 </div>
                                 <div class="flex justify-end space-x-3">
-                                    <button type="button" onclick="closeAddModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-sm transition">Hủy</button>
-                                    <button type="submit" id="btnAddSubmit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">Lưu Sân</button>
+                                    <button type="submit" id="btnAddSubmit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg shadow transition">Lưu Sân</button>
+                                    <button type="button" onclick="closeAddModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium py-2 px-4 rounded-lg shadow-sm transition">Hủy</button>
                                 </div>
                             </form>
                         </div>
@@ -95,11 +100,11 @@
                             <form id="editCourtForm" onsubmit="submitEditCourt(event)" class="text-left">
                                 <input type="hidden" id="editCourtId">
                                 <div class="mb-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Tên Sân</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên Sân</label>
                                     <input type="text" id="editCourtName" required class="w-full border border-gray-300 rounded-md py-2 px-3 focus:ring-blue-500 sm:text-sm">
                                 </div>
                                 <div class="mb-4">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Loại Sân</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Loại Sân</label>
                                     <select id="editCourtType" class="w-full border border-gray-300 rounded-md py-2 px-3 sm:text-sm focus:ring-blue-500 font-medium">
                                         <option value="Bóng đá">Bóng đá</option>
                                         <option value="Cầu lông">Cầu lông</option>
@@ -107,12 +112,12 @@
                                     </select>
                                 </div>
                                 <div class="mb-6">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Giá thuê (VNĐ/Giờ)</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Giá thuê (VNĐ/Giờ)</label>
                                     <input type="number" id="editCourtPrice" required min="1" class="w-full border border-gray-300 rounded-md py-2 px-3 sm:text-sm focus:ring-blue-500">
                                 </div>
                                 <div class="flex justify-end space-x-3">
-                                    <button type="button" onclick="closeEditModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-sm transition">Hủy</button>
-                                    <button type="submit" id="btnEditSubmit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition">Cập Nhật</button>
+                                    <button type="submit" id="btnEditSubmit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-lg shadow transition">Cập Nhật</button>
+                                    <button type="button" onclick="closeEditModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium py-2 px-4 rounded-lg shadow-sm transition">Hủy</button>
                                 </div>
                             </form>
                         </div>
@@ -124,6 +129,7 @@
 
     <!-- Nạp Layout & Logic JS -->
     <script src="/assets/js/config.js"></script>
+    <script src="/assets/js/auth.js"></script>
     <script src="/admin/assets/js/layout.js"></script>
     <script src="/admin/assets/js/courts.js"></script>
 </body>
