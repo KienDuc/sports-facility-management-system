@@ -121,3 +121,9 @@ def update_court(
         db.commit()
         db.refresh(court)
         return court
+
+@router.get("/public", response_model=List[CourtResponse])
+def get_public_courts(
+    db: Session = Depends(get_db)
+):
+    return db.query(Court).all()

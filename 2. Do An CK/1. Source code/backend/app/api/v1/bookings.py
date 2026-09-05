@@ -212,3 +212,43 @@ def cancel_booking(
     db.commit()
 
     return {"message": "Đã hủy đơn thành công"}
+
+# --- 5. API: ĐẶT SÂN ONLINE (DÀNH CHO KHÁCH VÃNG LAI, KHÔNG CẦN LOGIN) ---
+@router.post("/public")
+def create_public_booking(data: BookingCreate, db: Session = Depends(get_db)):
+    # 1. Kiểm tra sân
+    court = db.query(Court).filter(Court.id == data.court_id).first()
+    if not court:
+        raise HTTPException(status_code=404, detail="Không tìm thấy sân")
+
+    # 2. Tạo mã đơn
+    booking_code = f"ONL{int(time.time())}" # Đặt tiếp đầu ngữ ONL (Online) để Admin dễ phân biệt
+
+    # 3. Lưu Booking với trạng thái 'booked' (Đã đặt)
+    new_booking = Booking(
+        booking_code=booking_code,
+        customer_name=data.customer_name,
+        customer_phone=data.customer_phone,
+        booking_date=data.booking_date,
+        total_price=court.price_per_hour, # (Trong thực tế bạn có thể nhân với số giờ)
+        status="booked",
+        note="Khách vãng lai đặt qua Website",
+        created_by="Guest" # Ghi nhận hệ thống
+    )
+    db.add(new_booking)
+    db.commit()
+    db.refresh(new_booking)
+
+    # 4. Lưu BookingSlot
+    new_slot = BookingSlot(
+        booking_id=new_booking.id,
+        court_id=data.court_id,
+        booking_date=data.booking_date,
+        start_time=data.start_time,
+        end_time=data.end_time,
+        price=court.price_per_hour
+    )
+    db.add(new_slot)
+    db.commit()
+
+    return {"message": "Thành công", "booking_code": booking_code}

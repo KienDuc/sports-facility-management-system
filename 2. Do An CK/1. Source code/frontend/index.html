@@ -145,16 +145,51 @@
               </div>
             </div>
 
-            <!-- Chọn khung giờ -->
-            <div>
-              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">2. Khung giờ khả dụng</label>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                <button type="button" onclick="selectSlot(this, 1)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all">06:00 - 07:00</button>
-                <button type="button" onclick="selectSlot(this, 1.5)" class="slot-pill active p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-bold text-emerald-800 transition-all shadow-sm">17:30 - 19:00</button>
-                <button type="button" onclick="selectSlot(this, 1.5)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all">19:00 - 20:30</button>
-                <button type="button" onclick="selectSlot(this, 2)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all">20:30 - 22:30</button>
+            <div id="courtSelectionDiv" class="hidden mb-6"> <!-- Thêm mb-6 để cách phần dưới cho thoáng -->
+              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">2. Chọn sân cụ thể</label>
+              <div class="relative">
+                <!-- Thêm appearance-none để xóa mũi tên mặc định, pr-10 để chữ không đè lên mũi tên mới -->
+                <select id="publicCourtSelect" onchange="handleCourtChange()" class="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-sm font-medium text-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition-all cursor-pointer shadow-sm">
+                   <option value="">-- Vui lòng chọn sân bạn muốn --</option>
+                </select>
+                <!-- Icon mũi tên FontAwesome tự làm -->
+                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                   <i class="fa-solid fa-chevron-down text-xs"></i>
+                </div>
               </div>
             </div>
+<!--            <div id="courtSelectionDiv" class="hidden">-->
+<!--              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">2. Chọn sân cụ thể</label>-->
+<!--              <select id="publicCourtSelect" onchange="handleCourtChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:border-emerald-500 focus:outline-none transition-all cursor-pointer shadow-sm">-->
+<!--                 <option value="">&#45;&#45; Vui lòng chọn sân &#45;&#45;</option>-->
+<!--              </select>-->
+<!--            </div>-->
+
+            <!-- Chọn khung giờ -->
+            <div>
+              <label class="flex justify-between text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">
+                <span>3. Chọn ngày & giờ</span>
+
+                <button type="button" onclick="document.getElementById('publicBookingDate').showPicker()" class="relative border border-slate-200 bg-emerald-50 rounded-lg px-3 py-1.5 text-emerald-700 font-extrabold shadow-sm flex items-center gap-2 hover:border-emerald-400 transition-all cursor-pointer focus:outline-none">
+                   <i class="fa-regular fa-calendar-check"></i>
+                   <span id="displayDateText">--/--/----</span>
+
+                   <input type="date" id="publicBookingDate" onchange="handleDateChange()" class="absolute w-0 h-0 opacity-0 -z-10 border-0 p-0 overflow-hidden">
+                </button>
+              </label>
+              <div id="publicTimeSlots" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 text-[11px]">
+                <div class="col-span-full text-center text-xs font-medium py-4 text-slate-400 italic">Vui lòng chọn môn và sân trước...</div>
+              </div>
+            </div>
+<!--            <div>-->
+<!--              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">2. Khung giờ khả dụng</label>-->
+<!--              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">-->
+<!--                <button type="button" onclick="selectSlot(this, 1)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all">06:00 - 07:00</button>-->
+<!--                <button type="button" onclick="selectSlot(this, 1.5)" class="slot-pill active p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-bold text-emerald-800 transition-all shadow-sm">17:30 - 19:00</button>-->
+<!--                <button type="button" onclick="selectSlot(this, 1.5)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all">19:00 - 20:30</button>-->
+<!--                <button type="button" onclick="selectSlot(this, 2)" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all">20:30 - 22:30</button>-->
+<!--              </div>-->
+<!--            </div>-->
 
             <!-- Dịch vụ gia tăng -->
             <div>
@@ -228,9 +263,9 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Dự toán thanh toán:</span>
                 <span id="calculatedPrice" class="text-3xl font-extrabold text-white tracking-tight">495.000 <span class="text-xs font-medium text-emerald-400">VNĐ</span></span>
               </div>
-              <a href="/booking" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-600/30 hover:scale-105 transition duration-200 flex items-center gap-2">
-                <i class="fa-solid fa-bolt"></i> Giữ Sân Ngay
-              </a>
+              <button onclick="openPublicBookingModal()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-600/30 hover:scale-105 transition duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-futbol text-1xl"></i> Giữ Sân Ngay
+              </button>
             </div>
 
           </div>
@@ -480,6 +515,44 @@
     </form>
   </div>
 
+  <!-- ================= POPUP: ĐIỀN THÔNG TIN ĐẶT SÂN ================= -->
+  <div id="publicBookingModal" class="hidden fixed inset-0 bg-slate-900/60 overflow-y-auto h-full w-full z-50 flex items-center justify-center backdrop-blur-sm">
+    <div class="p-6 border w-96 shadow-2xl rounded-3xl bg-white relative">
+        <button onclick="document.getElementById('publicBookingModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <h3 class="text-xl font-extrabold text-slate-900 mb-1">Xác Nhận Đặt Sân</h3>
+        <p class="text-xs font-medium text-slate-500 mb-5">Vui lòng để lại thông tin để nhân viên liên hệ</p>
+
+        <form id="publicBookingForm" onsubmit="submitPublicBooking(event)">
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1.5">Sân đã chọn</label>
+                    <input type="text" id="pbCourtName" disabled class="w-full border border-slate-200 bg-slate-100 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-600 mb-1.5">Khung giờ</label>
+                        <input type="text" id="pbTime" disabled class="w-full border border-slate-200 bg-slate-100 rounded-xl px-3 py-2.5 text-sm font-semibold text-emerald-600 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-600 mb-1.5">Tổng tiền</label>
+                        <input type="text" id="pbPrice" disabled class="w-full border border-slate-200 bg-slate-100 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 text-center">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1.5">Tên của bạn <span class="text-red-500">*</span></label>
+                    <input type="text" id="pbCustomerName" required placeholder="VD: Quốc Anh" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600 mb-1.5">Số điện thoại <span class="text-red-500">*</span></label>
+                    <input type="text" id="pbCustomerPhone" required placeholder="VD: 0901234567" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none">
+                </div>
+            </div>
+            <button type="submit" id="pbSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition flex justify-center items-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu Đặt Sân
+            </button>
+        </form>
+    </div>
+  </div>
   <!-- ================= 8. JAVASCRIPT ================= -->
   <script src="/assets/js/config.js"></script>
   <script src="/assets/js/auth.js"></script>

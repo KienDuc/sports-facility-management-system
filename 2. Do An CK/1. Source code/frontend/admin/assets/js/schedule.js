@@ -25,7 +25,7 @@ async function fetchData() {
         const resCourts = await fetchWithAuth(API_COURTS);
         if (resCourts.ok) allCourts = (await resCourts.json()).filter(c => c.is_active === true);
     } catch (e) {}
-
+debugger;
     if (allCourts.length > 0 && selectedDate) {
         try {
             const resSchedule = await fetchWithAuth(`${API_BOOKINGS}/schedule?date=${selectedDate}`);
@@ -79,7 +79,7 @@ function renderTable() {
         displayCourts.forEach(court => {
             const slotInfo = bookedSlots.find(s => s.court_id === court.id && s.start_time === startTime && s.status !== 'canceled');
             let btnHtml = '';
-
+debugger;
             if (!slotInfo) {
                 if (isPastHour) {
                     btnHtml = `<button disabled class="w-full h-10 bg-gray-200 text-gray-400 font-semibold rounded shadow-sm text-sm cursor-not-allowed border border-gray-300">Đã qua giờ</button>`;

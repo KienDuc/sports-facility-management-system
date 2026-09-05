@@ -253,94 +253,234 @@ function handlePitchClick(event) {
   }, 350);
 }
 
-// --- 3. ĐỔI MÀU NỀN & TRANG BỊ MÔN THỂ THAO ---
-let sportRate = 250000;
-let slotHours = 1.5;
+// --- 3. LOGIC LẤY DATA, XẾP SÂN & ĐẶT SÂN TỰ ĐỘNG ---
+const PUBLIC_HOURS = [
+  "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00",
+  "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"
+];
+
+let systemCourts = [];
+let bookedSlotsData = [];
+let selectedDateStr = "";
+
+let currentSport = "";
+let selectedCourtInfo = null; // Chứa id, name, price của sân đang chọn
+let selectedSlotTime = null;  // Ví dụ: "17:00 - 18:00"
+
+let sportRate = 0;
+let slotHours = 1;
 let addonPrice = 120000;
+
 const heroSection = document.getElementById('about');
 
-function switchSportMode(type, rate, label) {
-  sportRate = rate;
+function formatDateToVN(dateString) {
+    if(!dateString) return "";
+    const [y, m, d] = dateString.split('-');
+    return `${d}/${m}/${y}`;
+}
+
+// [A] NẠP DỮ LIỆU TỪ BACKEND
+async function initPublicBooking() {
+  // Set ngày mặc định là hôm nay
+  const d = new Date();
+  selectedDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  const dateInput = document.getElementById('publicBookingDate');
+  const displayDateText = document.getElementById('displayDateText');
+
+  if (dateInput) {
+      dateInput.value = selectedDateStr;
+      dateInput.min = selectedDateStr; // KHÓA không cho chọn ngày trong quá khứ
+      if(displayDateText) displayDateText.innerText = formatDateToVN(selectedDateStr);
+  }
+
+  try {
+    const resCourts = await fetch(`${CONFIG.API_BASE_URL}/courts/public`);
+    if (resCourts.ok) systemCourts = (await resCourts.json()).filter(c => c.is_active);
+
+    // Nạp lịch đặt sân cho ngày hôm nay
+    await loadBookingsForDate(selectedDateStr);
+
+    switchSportMode('football', 0, 'Bóng Đá');
+  } catch (error) {
+    console.error("Lỗi tải dữ liệu sân:", error);
+  }
+}
+
+// [A.1] HÀM NẠP LỊCH ĐẶT SÂN THEO NGÀY (MỚI)
+async function loadBookingsForDate(dateStr) {
+    try {
+        const resSchedule = await fetch(`${CONFIG.API_BASE_URL}/bookings/schedule?date=${dateStr}`);
+        if (resSchedule.ok) {
+            bookedSlotsData = await resSchedule.json();
+        } else {
+            bookedSlotsData = [];
+        }
+    } catch (error) {
+        bookedSlotsData = [];
+    }
+}
+
+// [A.2] KHI KHÁCH HÀNG THAY ĐỔI NGÀY ĐẶT (MỚI)
+async function handleDateChange() {
+    const dateInput = document.getElementById('publicBookingDate');
+    if (!dateInput.value) return;
+
+    // Cập nhật ngày mới
+    selectedDateStr = dateInput.value;
+
+    const displayDateText = document.getElementById('displayDateText');
+    if(displayDateText) displayDateText.innerText = formatDateToVN(selectedDateStr);
+
+    // Bỏ khung giờ đang chọn cũ
+    selectedSlotTime = null;
+    calcTotal();
+
+    // Tải lại dữ liệu các ô đã bị đặt của ngày hôm đó
+    await loadBookingsForDate(selectedDateStr);
+
+    // Vẽ lại ma trận giờ nếu khách đã chọn sân
+    if (selectedCourtInfo) {
+        renderPublicTimeSlots();
+    }
+}
+
+// [B] KHI KHÁCH ĐỔI TAB MÔN THỂ THAO
+function switchSportMode(type, oldRate, label) {
+  currentSport = type;
   document.getElementById('liveSportBadge').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${label}`;
 
+  // Reset CSS các tab
+  document.querySelectorAll('.sport-tab-btn').forEach(b => {
+    b.className = 'sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all';
+  });
+
+  // Lọc sân theo môn (Quy đổi keyword)
+  const keyword = type === 'football' ? 'bóng đá' : type === 'pickleball' ? 'pickleball' : 'cầu lông';
+  const availableCourts = systemCourts.filter(c => c.type.toLowerCase().includes(keyword));
+
+  // Đổ data vào thẻ <select>
+  const selectEl = document.getElementById('publicCourtSelect');
+  if(selectEl) {
+    selectEl.innerHTML = `<option value="">-- Vui lòng chọn sân bạn muốn --</option>`;
+    availableCourts.forEach(c => {
+      selectEl.innerHTML += `<option value="${c.id}" data-price="${c.price_per_hour}">${c.name} - ${new Intl.NumberFormat('vi-VN').format(c.price_per_hour)}đ/giờ</option>`;
+    });
+
+    // Hiện ô chọn sân, giấu ô giờ
+    document.getElementById('courtSelectionDiv').classList.remove('hidden');
+    document.getElementById('publicTimeSlots').innerHTML = '<div class="col-span-full text-center text-xs font-medium py-4 text-slate-400 italic">Vui lòng chọn sân cụ thể trước...</div>';
+  }
+
+  // reset sân sau khi chọn môn khác
+  selectedCourtInfo = null;
+
+  // Reset giá và giờ
+  sportRate = 0; selectedSlotTime = null; calcTotal();
+
+  // --- LOGIC GIAO DIỆN ROBOT (Giữ nguyên của bạn) ---
   const title = document.getElementById('pitchTypeTitle');
   const equip = document.getElementById('robotEquipment');
   const ball = document.getElementById('projectedBall');
   const visor = document.getElementById('robotVisor');
   const svgPitch = document.getElementById('pitchSvg');
-
-  document.querySelectorAll('.sport-tab-btn').forEach(b => {
-    b.className = 'sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all';
-  });
-
   heroSection.classList.remove('theme-football', 'theme-pickleball', 'theme-badminton');
 
   if (type === 'football') {
     document.getElementById('tab-football').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md';
     title.innerHTML = '<i class="fa-solid fa-futbol text-emerald-400 mr-1"></i> Mô Phỏng Mặt Sân Bóng Đá';
     heroSection.classList.add('theme-football');
-
     ball.innerText = '⚽';
     visor.setAttribute('fill', '#10b981');
     visor.className.baseVal = "visor-glow text-emerald-400";
     equip.innerHTML = `<circle cx="60" cy="112" r="10" fill="white" stroke="#475569" stroke-width="2"/>`;
-    svgPitch.innerHTML = `
-      <rect x="10" y="10" width="280" height="130" fill="none" stroke="#34d399" stroke-width="2"/>
-      <line x1="150" y1="10" x2="150" y2="140" stroke="#34d399" stroke-width="1.5"/>
-      <circle cx="150" cy="75" r="28" fill="none" stroke="#34d399" stroke-width="1.5"/>
-      <rect x="10" y="40" width="35" height="70" fill="none" stroke="#34d399" stroke-width="1.5"/>
-      <rect x="255" y="40" width="35" height="70" fill="none" stroke="#34d399" stroke-width="1.5"/>
-    `;
-
+    svgPitch.innerHTML = `<rect x="10" y="10" width="280" height="130" fill="none" stroke="#34d399" stroke-width="2"/> <line x1="150" y1="10" x2="150" y2="140" stroke="#34d399" stroke-width="1.5"/> <circle cx="150" cy="75" r="28" fill="none" stroke="#34d399" stroke-width="1.5"/> <rect x="10" y="40" width="35" height="70" fill="none" stroke="#34d399" stroke-width="1.5"/> <rect x="255" y="40" width="35" height="70" fill="none" stroke="#34d399" stroke-width="1.5"/>`;
   } else if (type === 'pickleball') {
     document.getElementById('tab-pickleball').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-cyan-500 bg-cyan-50 text-cyan-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md';
     title.innerHTML = '<i class="fa-solid fa-table-tennis-paddle-ball text-cyan-400 mr-1"></i> Mô Phỏng Mặt Sân PickleBall';
     heroSection.classList.add('theme-pickleball');
-
     ball.innerText = '🟡';
     visor.setAttribute('fill', '#06b6d4');
     visor.className.baseVal = "visor-glow text-cyan-400";
-    equip.innerHTML = `
-      <rect x="78" y="70" width="18" height="26" rx="6" fill="#06b6d4" stroke="white" stroke-width="2"/>
-      <line x1="87" y1="96" x2="87" y2="108" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
-    `;
-    svgPitch.innerHTML = `
-      <rect x="20" y="15" width="260" height="120" fill="none" stroke="#22d3ee" stroke-width="2"/>
-      <line x1="150" y1="15" x2="150" y2="135" stroke="#06b6d4" stroke-width="2"/>
-      <rect x="105" y="15" width="90" height="120" fill="rgba(6, 182, 212, 0.15)" stroke="#22d3ee" stroke-width="1"/>
-      <line x1="20" y1="75" x2="105" y2="75" stroke="#22d3ee" stroke-width="1"/>
-      <line x1="195" y1="75" x2="280" y2="75" stroke="#22d3ee" stroke-width="1"/>
-    `;
-
+    equip.innerHTML = `<rect x="78" y="70" width="18" height="26" rx="6" fill="#06b6d4" stroke="white" stroke-width="2"/> <line x1="87" y1="96" x2="87" y2="108" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>`;
+    svgPitch.innerHTML = `<rect x="20" y="15" width="260" height="120" fill="none" stroke="#22d3ee" stroke-width="2"/> <line x1="150" y1="15" x2="150" y2="135" stroke="#06b6d4" stroke-width="2"/> <rect x="105" y="15" width="90" height="120" fill="rgba(6, 182, 212, 0.15)" stroke="#22d3ee" stroke-width="1"/> <line x1="20" y1="75" x2="105" y2="75" stroke="#22d3ee" stroke-width="1"/> <line x1="195" y1="75" x2="280" y2="75" stroke="#22d3ee" stroke-width="1"/>`;
   } else if (type === 'badminton') {
     document.getElementById('tab-badminton').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-violet-500 bg-violet-50 text-violet-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md';
     title.innerHTML = '<i class="fa-solid fa-feather text-violet-400 mr-1"></i> Mô Phỏng Mặt Sân Cầu Lông';
     heroSection.classList.add('theme-badminton');
-
     ball.innerText = '🏸';
     visor.setAttribute('fill', '#8b5cf6');
     visor.className.baseVal = "visor-glow text-violet-400";
-    equip.innerHTML = `
-      <ellipse cx="86" cy="72" rx="10" ry="14" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
-      <line x1="86" y1="86" x2="86" y2="108" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
-    `;
-    svgPitch.innerHTML = `
-      <rect x="20" y="15" width="260" height="120" fill="none" stroke="#a78bfa" stroke-width="2"/>
-      <line x1="150" y1="15" x2="150" y2="135" stroke="#8b5cf6" stroke-width="2"/>
-      <line x1="35" y1="15" x2="35" y2="135" stroke="#a78bfa" stroke-width="1"/>
-      <line x1="265" y1="15" x2="265" y2="135" stroke="#a78bfa" stroke-width="1"/>
-      <line x1="20" y1="75" x2="280" y2="75" stroke="#a78bfa" stroke-width="1"/>
-    `;
+    equip.innerHTML = `<ellipse cx="86" cy="72" rx="10" ry="14" fill="none" stroke="#8b5cf6" stroke-width="2.5"/> <line x1="86" y1="86" x2="86" y2="108" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>`;
+    svgPitch.innerHTML = `<rect x="20" y="15" width="260" height="120" fill="none" stroke="#a78bfa" stroke-width="2"/> <line x1="150" y1="15" x2="150" y2="135" stroke="#8b5cf6" stroke-width="2"/> <line x1="35" y1="15" x2="35" y2="135" stroke="#a78bfa" stroke-width="1"/> <line x1="265" y1="15" x2="265" y2="135" stroke="#a78bfa" stroke-width="1"/> <line x1="20" y1="75" x2="280" y2="75" stroke="#a78bfa" stroke-width="1"/>`;
   }
-  calcTotal();
 }
 
-function selectSlot(btn, hours) {
-  slotHours = hours;
-  document.querySelectorAll('.slot-pill').forEach(b => {
-    b.className = 'slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all';
+// [C] KHI KHÁCH ĐỔI SÂN (DROPDOWN)
+function handleCourtChange() {
+  const select = document.getElementById('publicCourtSelect');
+  if(!select.value) {
+      document.getElementById('publicTimeSlots').innerHTML = '<div class="col-span-full text-center py-4 text-slate-400 italic">Vui lòng chọn sân cụ thể trước...</div>';
+      sportRate = 0; calcTotal();
+      return;
+  }
+
+  const option = select.options[select.selectedIndex];
+  selectedCourtInfo = {
+      id: parseInt(select.value),
+      name: option.text.split(' - ')[0],
+      price: parseFloat(option.getAttribute('data-price'))
+  };
+
+  sportRate = selectedCourtInfo.price;
+  selectedSlotTime = null; // Bỏ giờ đã chọn trước đó
+  calcTotal();
+  renderPublicTimeSlots();
+}
+
+// [D] VẼ MA TRẬN KHUNG GIỜ THỰC TẾ (CẬP NHẬT LOGIC QUÁ GIỜ)
+function renderPublicTimeSlots() {
+  const container = document.getElementById('publicTimeSlots');
+  container.innerHTML = '';
+
+  const now = new Date();
+  // Tạo chuỗi ngày hôm nay để so sánh
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  // Kiểm tra xem khách đang xem ngày hôm nay hay ngày tương lai
+  const isViewingToday = (selectedDateStr === todayStr);
+
+  for (let i = 0; i < PUBLIC_HOURS.length - 1; i++) {
+    const start = PUBLIC_HOURS[i], end = PUBLIC_HOURS[i+1];
+
+    // 1. Kiểm tra xem giờ này đã bị ai đặt chưa
+    const isBooked = bookedSlotsData.some(b => b.court_id === selectedCourtInfo.id && b.start_time === start && b.status !== 'canceled');
+
+    // 2. Kiểm tra giờ đã qua (CHỈ khóa nếu khách đang xem ngày hôm nay)
+    let isPast = false;
+    if (isViewingToday) {
+        const [h, m] = start.split(':');
+        const slotTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(h), parseInt(m));
+        isPast = now >= slotTime;
+    }
+
+    if (isBooked) {
+        container.innerHTML += `<button disabled class="p-2.5 rounded-xl border border-red-200 bg-red-50 font-bold text-red-500 shadow-sm opacity-60 cursor-not-allowed">Đã Kín</button>`;
+    } else if (isPast) {
+        container.innerHTML += `<button disabled class="p-2.5 rounded-xl border border-slate-200 bg-slate-100 font-semibold text-slate-400 cursor-not-allowed">Đã Qua</button>`;
+    } else {
+        container.innerHTML += `<button onclick="selectPublicSlot(this, '${start}', '${end}')" class="slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 transition-all shadow-sm">${start}</button>`;
+    }
+  }
+}
+
+// [E] KHI KHÁCH BẤM CHỌN GIỜ TRỐNG
+function selectPublicSlot(btn, start, end) {
+  selectedSlotTime = `${start} - ${end}`;
+  document.querySelectorAll('#publicTimeSlots .slot-pill').forEach(b => {
+    b.className = 'slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:border-emerald-500 hover:text-emerald-700 transition-all shadow-sm';
   });
-  btn.className = 'slot-pill active p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-bold text-emerald-800 transition-all shadow-sm';
+  btn.className = 'slot-pill active p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-extrabold text-emerald-800 transition-all shadow-md scale-105';
   calcTotal();
 }
 
@@ -350,81 +490,152 @@ function toggleAddon(price, checked) {
 }
 
 function calcTotal() {
-  const total = (sportRate * slotHours) + addonPrice;
+  const total = selectedSlotTime ? (sportRate * slotHours) + addonPrice : 0;
   document.getElementById('calculatedPrice').innerHTML = `${total.toLocaleString('vi-VN')} <span class="text-xs font-medium text-emerald-400">VNĐ</span>`;
 }
-// // 3. 2D PITCH & LIVE ESTIMATION LOGIC
+
+// [F] MỞ POPUP XÁC NHẬN
+function openPublicBookingModal() {
+    if(!selectedCourtInfo || !selectedSlotTime) {
+        alert("Bạn vui lòng chọn Sân và Khung giờ trống để tiếp tục nhé!");
+        return;
+    }
+    document.getElementById('pbCourtName').value = selectedCourtInfo.name;
+    document.getElementById('pbTime').value = selectedSlotTime;
+    document.getElementById('pbPrice').value = document.getElementById('calculatedPrice').innerText;
+    document.getElementById('publicBookingModal').classList.remove('hidden');
+}
+
+// [G] SUBMIT YÊU CẦU LÊN SERVER
+async function submitPublicBooking(e) {
+    e.preventDefault();
+    const btn = document.getElementById('pbSubmitBtn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+    btn.disabled = true;
+
+    const payload = {
+        court_id: selectedCourtInfo.id,
+        booking_date: selectedDateStr,
+        start_time: selectedSlotTime.split(' - ')[0],
+        end_time: selectedSlotTime.split(' - ')[1],
+        customer_name: document.getElementById('pbCustomerName').value,
+        customer_phone: document.getElementById('pbCustomerPhone').value,
+        status: "booked"
+    };
+
+    try {
+        const res = await fetch(`${CONFIG.API_BASE_URL}/bookings/public`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert("🎉 Đặt sân thành công! Nhân viên sẽ liên hệ lại với bạn trong ít phút!");
+            document.getElementById('publicBookingModal').classList.add('hidden');
+            document.getElementById('publicBookingForm').reset();
+            initPublicBooking(); // Tải lại ma trận giờ
+        } else {
+            alert("Rất tiếc, có người vừa nhanh tay hơn đặt khung giờ này. Vui lòng chọn giờ khác!");
+        }
+    } catch (error) {
+        alert("Lỗi kết nối máy chủ, vui lòng gọi Hotline!");
+    }
+
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Gửi Yêu Cầu Đặt Sân';
+    btn.disabled = false;
+}
+
+// Khởi chạy lấy data khi load xong trang
+document.addEventListener("DOMContentLoaded", initPublicBooking);
+// // --- 3. ĐỔI MÀU NỀN & TRANG BỊ MÔN THỂ THAO ---
 // let sportRate = 250000;
 // let slotHours = 1.5;
 // let addonPrice = 120000;
+// const heroSection = document.getElementById('about');
 //
-// function changeSport(type, rate, label) {
+// function switchSportMode(type, rate, label) {
 //   sportRate = rate;
-//   document.getElementById('liveSportBadge').innerText = label;
+//   document.getElementById('liveSportBadge').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${label}`;
 //
-//   const pitch = document.getElementById('interactivePitch');
-//   const svg = document.getElementById('pitchSvg');
-//   const icon = document.getElementById('ballIcon');
+//   const title = document.getElementById('pitchTypeTitle');
+//   const equip = document.getElementById('robotEquipment');
+//   const ball = document.getElementById('projectedBall');
+//   const visor = document.getElementById('robotVisor');
+//   const svgPitch = document.getElementById('pitchSvg');
 //
 //   document.querySelectorAll('.sport-tab-btn').forEach(b => {
-//     b.className = 'sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition';
+//     b.className = 'sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white/70 text-slate-600 hover:border-emerald-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all';
 //   });
 //
+//   heroSection.classList.remove('theme-football', 'theme-pickleball', 'theme-badminton');
+//
 //   if (type === 'football') {
-//     document.getElementById('tab-football').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
-//     pitch.className = 'w-full h-44 rounded-xl border-2 border-emerald-500/40 bg-emerald-950/80 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
-//     icon.className = 'fa-solid fa-futbol text-xs text-slate-900';
-//     svg.innerHTML = `
-//       <rect x="10" y="10" width="280" height="130" fill="none" stroke="white" stroke-width="2"/>
-//       <line x1="150" y1="10" x2="150" y2="140" stroke="white" stroke-width="2"/>
-//       <circle cx="150" cy="75" r="28" fill="none" stroke="white" stroke-width="2"/>
-//       <rect x="10" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
-//       <rect x="255" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
+//     document.getElementById('tab-football').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md';
+//     title.innerHTML = '<i class="fa-solid fa-futbol text-emerald-400 mr-1"></i> Mô Phỏng Mặt Sân Bóng Đá';
+//     heroSection.classList.add('theme-football');
+//
+//     ball.innerText = '⚽';
+//     visor.setAttribute('fill', '#10b981');
+//     visor.className.baseVal = "visor-glow text-emerald-400";
+//     equip.innerHTML = `<circle cx="60" cy="112" r="10" fill="white" stroke="#475569" stroke-width="2"/>`;
+//     svgPitch.innerHTML = `
+//       <rect x="10" y="10" width="280" height="130" fill="none" stroke="#34d399" stroke-width="2"/>
+//       <line x1="150" y1="10" x2="150" y2="140" stroke="#34d399" stroke-width="1.5"/>
+//       <circle cx="150" cy="75" r="28" fill="none" stroke="#34d399" stroke-width="1.5"/>
+//       <rect x="10" y="40" width="35" height="70" fill="none" stroke="#34d399" stroke-width="1.5"/>
+//       <rect x="255" y="40" width="35" height="70" fill="none" stroke="#34d399" stroke-width="1.5"/>
 //     `;
+//
 //   } else if (type === 'pickleball') {
-//     document.getElementById('tab-pickleball').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-teal-600 bg-teal-50 text-teal-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
-//     pitch.className = 'w-full h-44 rounded-xl border-2 border-teal-500/40 bg-teal-950/90 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
-//     icon.className = 'fa-solid fa-table-tennis-paddle-ball text-xs text-teal-700';
-//     svg.innerHTML = `
-//       <rect x="20" y="15" width="260" height="120" fill="none" stroke="white" stroke-width="2"/>
-//       <line x1="150" y1="15" x2="150" y2="135" stroke="#38bdf8" stroke-width="3"/>
-//       <rect x="105" y="15" width="90" height="120" fill="rgba(56, 189, 248, 0.15)" stroke="white" stroke-width="1.5"/>
-//       <line x1="20" y1="75" x2="105" y2="75" stroke="white" stroke-width="1.5"/>
-//       <line x1="195" y1="75" x2="280" y2="75" stroke="white" stroke-width="1.5"/>
+//     document.getElementById('tab-pickleball').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-cyan-500 bg-cyan-50 text-cyan-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md';
+//     title.innerHTML = '<i class="fa-solid fa-table-tennis-paddle-ball text-cyan-400 mr-1"></i> Mô Phỏng Mặt Sân PickleBall';
+//     heroSection.classList.add('theme-pickleball');
+//
+//     ball.innerText = '🟡';
+//     visor.setAttribute('fill', '#06b6d4');
+//     visor.className.baseVal = "visor-glow text-cyan-400";
+//     equip.innerHTML = `
+//       <rect x="78" y="70" width="18" height="26" rx="6" fill="#06b6d4" stroke="white" stroke-width="2"/>
+//       <line x1="87" y1="96" x2="87" y2="108" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
 //     `;
+//     svgPitch.innerHTML = `
+//       <rect x="20" y="15" width="260" height="120" fill="none" stroke="#22d3ee" stroke-width="2"/>
+//       <line x1="150" y1="15" x2="150" y2="135" stroke="#06b6d4" stroke-width="2"/>
+//       <rect x="105" y="15" width="90" height="120" fill="rgba(6, 182, 212, 0.15)" stroke="#22d3ee" stroke-width="1"/>
+//       <line x1="20" y1="75" x2="105" y2="75" stroke="#22d3ee" stroke-width="1"/>
+//       <line x1="195" y1="75" x2="280" y2="75" stroke="#22d3ee" stroke-width="1"/>
+//     `;
+//
 //   } else if (type === 'badminton') {
-//     document.getElementById('tab-badminton').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-blue-600 bg-blue-50 text-blue-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
-//     pitch.className = 'w-full h-44 rounded-xl border-2 border-blue-500/40 bg-blue-950/90 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
-//     icon.className = 'fa-solid fa-feather text-xs text-blue-700';
-//     svg.innerHTML = `
-//       <rect x="20" y="15" width="260" height="120" fill="none" stroke="white" stroke-width="2"/>
-//       <line x1="150" y1="15" x2="150" y2="135" stroke="white" stroke-width="3"/>
-//       <line x1="35" y1="15" x2="35" y2="135" stroke="white" stroke-width="1.5"/>
-//       <line x1="265" y1="15" x2="265" y2="135" stroke="white" stroke-width="1.5"/>
-//       <line x1="20" y1="75" x2="280" y2="75" stroke="white" stroke-width="1"/>
+//     document.getElementById('tab-badminton').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-violet-500 bg-violet-50 text-violet-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md';
+//     title.innerHTML = '<i class="fa-solid fa-feather text-violet-400 mr-1"></i> Mô Phỏng Mặt Sân Cầu Lông';
+//     heroSection.classList.add('theme-badminton');
+//
+//     ball.innerText = '🏸';
+//     visor.setAttribute('fill', '#8b5cf6');
+//     visor.className.baseVal = "visor-glow text-violet-400";
+//     equip.innerHTML = `
+//       <ellipse cx="86" cy="72" rx="10" ry="14" fill="none" stroke="#8b5cf6" stroke-width="2.5"/>
+//       <line x1="86" y1="86" x2="86" y2="108" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+//     `;
+//     svgPitch.innerHTML = `
+//       <rect x="20" y="15" width="260" height="120" fill="none" stroke="#a78bfa" stroke-width="2"/>
+//       <line x1="150" y1="15" x2="150" y2="135" stroke="#8b5cf6" stroke-width="2"/>
+//       <line x1="35" y1="15" x2="35" y2="135" stroke="#a78bfa" stroke-width="1"/>
+//       <line x1="265" y1="15" x2="265" y2="135" stroke="#a78bfa" stroke-width="1"/>
+//       <line x1="20" y1="75" x2="280" y2="75" stroke="#a78bfa" stroke-width="1"/>
 //     `;
 //   }
 //   calcTotal();
 // }
 //
-// function kickBall() {
-//   const ball = document.getElementById('ballElement');
-//   const randomX = Math.floor(Math.random() * 70) + 15;
-//   const randomY = Math.floor(Math.random() * 55) + 20;
-//   ball.style.left = `${randomX}%`;
-//   ball.style.top = `${randomY}%`;
-//   ball.style.transform = `scale(1.25) rotate(${Math.random() * 360}deg)`;
-//   setTimeout(() => {
-//     ball.style.transform = `scale(1) rotate(0deg)`;
-//   }, 350);
-// }
-//
 // function selectSlot(btn, hours) {
 //   slotHours = hours;
 //   document.querySelectorAll('.slot-pill').forEach(b => {
-//     b.className = 'slot-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-700 hover:border-emerald-500 transition';
+//     b.className = 'slot-pill p-2.5 rounded-xl border border-slate-200 bg-white font-semibold text-slate-600 hover:border-emerald-500 hover:text-emerald-700 transition-all';
 //   });
-//   btn.className = 'slot-pill active p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 font-bold text-emerald-800 transition';
+//   btn.className = 'slot-pill active p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-bold text-emerald-800 transition-all shadow-sm';
 //   calcTotal();
 // }
 //
@@ -435,8 +646,92 @@ function calcTotal() {
 //
 // function calcTotal() {
 //   const total = (sportRate * slotHours) + addonPrice;
-//   document.getElementById('calculatedPrice').innerHTML = `${total.toLocaleString('vi-VN')} <span class="text-xs font-bold text-emerald-400">VNĐ</span>`;
+//   document.getElementById('calculatedPrice').innerHTML = `${total.toLocaleString('vi-VN')} <span class="text-xs font-medium text-emerald-400">VNĐ</span>`;
 // }
+// // // 3. 2D PITCH & LIVE ESTIMATION LOGIC
+// // let sportRate = 250000;
+// // let slotHours = 1.5;
+// // let addonPrice = 120000;
+// //
+// // function changeSport(type, rate, label) {
+// //   sportRate = rate;
+// //   document.getElementById('liveSportBadge').innerText = label;
+// //
+// //   const pitch = document.getElementById('interactivePitch');
+// //   const svg = document.getElementById('pitchSvg');
+// //   const icon = document.getElementById('ballIcon');
+// //
+// //   document.querySelectorAll('.sport-tab-btn').forEach(b => {
+// //     b.className = 'sport-tab-btn p-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition';
+// //   });
+// //
+// //   if (type === 'football') {
+// //     document.getElementById('tab-football').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
+// //     pitch.className = 'w-full h-44 rounded-xl border-2 border-emerald-500/40 bg-emerald-950/80 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
+// //     icon.className = 'fa-solid fa-futbol text-xs text-slate-900';
+// //     svg.innerHTML = `
+// //       <rect x="10" y="10" width="280" height="130" fill="none" stroke="white" stroke-width="2"/>
+// //       <line x1="150" y1="10" x2="150" y2="140" stroke="white" stroke-width="2"/>
+// //       <circle cx="150" cy="75" r="28" fill="none" stroke="white" stroke-width="2"/>
+// //       <rect x="10" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
+// //       <rect x="255" y="40" width="35" height="70" fill="none" stroke="white" stroke-width="2"/>
+// //     `;
+// //   } else if (type === 'pickleball') {
+// //     document.getElementById('tab-pickleball').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-teal-600 bg-teal-50 text-teal-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
+// //     pitch.className = 'w-full h-44 rounded-xl border-2 border-teal-500/40 bg-teal-950/90 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
+// //     icon.className = 'fa-solid fa-table-tennis-paddle-ball text-xs text-teal-700';
+// //     svg.innerHTML = `
+// //       <rect x="20" y="15" width="260" height="120" fill="none" stroke="white" stroke-width="2"/>
+// //       <line x1="150" y1="15" x2="150" y2="135" stroke="#38bdf8" stroke-width="3"/>
+// //       <rect x="105" y="15" width="90" height="120" fill="rgba(56, 189, 248, 0.15)" stroke="white" stroke-width="1.5"/>
+// //       <line x1="20" y1="75" x2="105" y2="75" stroke="white" stroke-width="1.5"/>
+// //       <line x1="195" y1="75" x2="280" y2="75" stroke="white" stroke-width="1.5"/>
+// //     `;
+// //   } else if (type === 'badminton') {
+// //     document.getElementById('tab-badminton').className = 'sport-tab-btn active p-3 rounded-2xl border-2 border-blue-600 bg-blue-50 text-blue-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm';
+// //     pitch.className = 'w-full h-44 rounded-xl border-2 border-blue-500/40 bg-blue-950/90 relative overflow-hidden flex items-center justify-center cursor-pointer shadow-inner transition-all duration-500';
+// //     icon.className = 'fa-solid fa-feather text-xs text-blue-700';
+// //     svg.innerHTML = `
+// //       <rect x="20" y="15" width="260" height="120" fill="none" stroke="white" stroke-width="2"/>
+// //       <line x1="150" y1="15" x2="150" y2="135" stroke="white" stroke-width="3"/>
+// //       <line x1="35" y1="15" x2="35" y2="135" stroke="white" stroke-width="1.5"/>
+// //       <line x1="265" y1="15" x2="265" y2="135" stroke="white" stroke-width="1.5"/>
+// //       <line x1="20" y1="75" x2="280" y2="75" stroke="white" stroke-width="1"/>
+// //     `;
+// //   }
+// //   calcTotal();
+// // }
+// //
+// // function kickBall() {
+// //   const ball = document.getElementById('ballElement');
+// //   const randomX = Math.floor(Math.random() * 70) + 15;
+// //   const randomY = Math.floor(Math.random() * 55) + 20;
+// //   ball.style.left = `${randomX}%`;
+// //   ball.style.top = `${randomY}%`;
+// //   ball.style.transform = `scale(1.25) rotate(${Math.random() * 360}deg)`;
+// //   setTimeout(() => {
+// //     ball.style.transform = `scale(1) rotate(0deg)`;
+// //   }, 350);
+// // }
+// //
+// // function selectSlot(btn, hours) {
+// //   slotHours = hours;
+// //   document.querySelectorAll('.slot-pill').forEach(b => {
+// //     b.className = 'slot-pill p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-700 hover:border-emerald-500 transition';
+// //   });
+// //   btn.className = 'slot-pill active p-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 font-bold text-emerald-800 transition';
+// //   calcTotal();
+// // }
+// //
+// // function toggleAddon(price, checked) {
+// //   addonPrice = checked ? price : 0;
+// //   calcTotal();
+// // }
+// //
+// // function calcTotal() {
+// //   const total = (sportRate * slotHours) + addonPrice;
+// //   document.getElementById('calculatedPrice').innerHTML = `${total.toLocaleString('vi-VN')} <span class="text-xs font-bold text-emerald-400">VNĐ</span>`;
+// // }
 
 // 4. AI CHATBOT
 function toggleChat() {
@@ -496,7 +791,6 @@ async function handleChatSubmit(e) {
 // --- 5. KIỂM TRA ĐĂNG NHẬP (AUTH CHECK) ---
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Lấy token từ Local hoặc Session
-    debugger;
   const token = localStorage.getItem('elite_sport_token') || sessionStorage.getItem('elite_sport_token');
   const authBtn = document.getElementById('authActionBtn');
 

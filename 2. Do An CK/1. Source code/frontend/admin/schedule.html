@@ -84,28 +84,28 @@
                             <h3 class="text-lg font-bold text-gray-900">Mở Đơn Đặt Sân</h3>
                             <button onclick="closeBookingModal()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
                         </div>
-                        <p class="text-sm text-gray-500 mb-4">Khung giờ: <strong id="bookingTime" class="text-blue-600"></strong> tại <strong id="bookingCourt" class="text-gray-800"></strong></p>
+                        <p class="text-sm text-gray-500 mb-4 font-medium">Khung giờ: <strong id="bookingTime" class="text-blue-600"></strong> tại <strong id="bookingCourt" class="text-gray-800"></strong></p>
 
                         <form id="bookingForm" onsubmit="confirmBooking(event)">
                             <input type="hidden" id="bookingCourtId">
                             <div class="mb-3">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Tên khách hàng *</label>
-                                <input type="text" id="customerName" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500" placeholder="Nhập tên khách...">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tên khách hàng <span class="text-red-500">*</span></label>
+                                <input type="text" id="customerName" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 text-sm font-medium" placeholder="Nhập tên khách...">
                             </div>
                             <div class="mb-3">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Số điện thoại *</label>
-                                <input type="text" id="customerPhone" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500" placeholder="Nhập SĐT...">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                                <input type="text" id="customerPhone" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 text-sm font-medium" placeholder="Nhập SĐT...">
                             </div>
                             <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Loại hình đặt</label>
-                                <select id="bookingStatus" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 font-medium">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Loại hình đặt</label>
+                                <select id="bookingStatus" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 text-sm font-medium">
                                     <option value="booked">Khách đặt trước</option>
                                     <option value="playing">Khách vào chơi luôn</option>
                                 </select>
                             </div>
                             <div class="flex justify-end space-x-3">
-                                <button type="button" onclick="closeBookingModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg">Hủy</button>
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md">Tạo Đơn</button>
+                                <button type="submit" class="w-24 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg shadow-md">Tạo Đơn</button>
+                                <button type="button" onclick="closeBookingModal()" class="w-24 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium py-2 px-3 rounded-lg">Hủy</button>
                             </div>
                         </form>
                     </div>
@@ -119,20 +119,20 @@
                             <button onclick="closeDetailModal()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
                         </div>
                         <div class="space-y-3 text-sm text-gray-600 mb-6">
-                            <div class="flex justify-between"><span class="font-medium">Mã Đơn:</span> <span id="detailCode" class="font-bold text-blue-600"></span></div>
-                            <div class="flex justify-between"><span class="font-medium">Khách hàng:</span> <span id="detailName" class="font-semibold text-gray-900"></span></div>
-                            <div class="flex justify-between"><span class="font-medium">SĐT:</span> <span id="detailPhone" class="font-semibold text-gray-900"></span></div>
-                            <div class="flex justify-between"><span class="font-medium">Trạng thái:</span> <span id="detailStatus" class="px-2 py-0.5 rounded text-xs font-bold"></span></div>
+                            <div class="flex justify-between"><span class="text-sm font-medium">Mã Đơn:</span> <span id="detailCode" class="font-bold text-blue-600"></span></div>
+                            <div class="flex justify-between"><span class="text-sm font-medium">Khách hàng:</span> <span id="detailName" class="text-sm font-medium text-gray-900"></span></div>
+                            <div class="flex justify-between"><span class="text-sm font-medium">SĐT:</span> <span id="detailPhone" class="text-sm font-medium text-gray-900"></span></div>
+                            <div class="flex justify-between"><span class="text-sm font-medium">Trạng thái:</span> <span id="detailStatus" class="px-2 py-0.5 rounded text-xs font-bold"></span></div>
                         </div>
 
                         <div class="flex flex-col space-y-3">
-                            <button id="btnCheckIn" onclick="updateBookingStatus('playing')" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 rounded-lg shadow-md transition hidden">
+                            <button id="btnCheckIn" onclick="updateBookingStatus('playing')" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium py-2.5 rounded-lg shadow-md transition hidden">
                                 <i class="fa-solid fa-check-to-slot mr-1"></i> Khách Vào Chơi
                             </button>
-                            <button id="btnComplete" onclick="completeBooking()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-lg shadow-md transition hidden">
+                            <button id="btnComplete" onclick="completeBooking()" class="w-full bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2.5 rounded-lg shadow-md transition hidden">
                                 <i class="fa-solid fa-check mr-1"></i> Hoàn Thành
                             </button>
-                            <button id="btnCancelBooking" onclick="cancelBooking()" class="w-full bg-gray-100 hover:bg-red-100 text-red-600 font-semibold py-2.5 rounded-lg transition hidden">
+                            <button id="btnCancelBooking" onclick="cancelBooking()" class="w-full bg-gray-100 hover:bg-red-100 text-red-600 text-sm font-medium py-2.5 rounded-lg transition hidden">
                                 Hủy Đơn
                             </button>
                         </div>
