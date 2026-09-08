@@ -1,3 +1,4 @@
+console.log("SCHEDULE JS FIX VERSION 2");
 const API_COURTS = `${CONFIG.API_BASE_URL}/courts/`;
 const API_BOOKINGS = `${CONFIG.API_BASE_URL}/bookings`;
 
@@ -25,7 +26,6 @@ async function fetchData() {
         const resCourts = await fetchWithAuth(API_COURTS);
         if (resCourts.ok) allCourts = (await resCourts.json()).filter(c => c.is_active === true);
     } catch (e) {}
-debugger;
     if (allCourts.length > 0 && selectedDate) {
         try {
             const resSchedule = await fetchWithAuth(`${API_BOOKINGS}/schedule?date=${selectedDate}`);
@@ -33,13 +33,38 @@ debugger;
             else bookedSlots = [];
         } catch (e) { bookedSlots = []; }
     } else bookedSlots = [];
-    applyFilters();
+    applyFilters(false);
 }
 
-function applyFilters() {
+function applyFilters(resetPage = true) {
+    console.log("applyFilters:", resetPage, "currentPage trước =", currentPage);
+
     const typeFilter = document.getElementById('filterType').value;
-    filteredCourts = typeFilter === 'all' ? [...allCourts] : allCourts.filter(c => c.type.toLowerCase().includes(typeFilter.toLowerCase()));
-    currentPage = 1;
+
+    filteredCourts = typeFilter === 'all'
+        ? [...allCourts]
+        : allCourts.filter(
+            c => c.type.toLowerCase().includes(typeFilter.toLowerCase())
+        );
+
+    if (resetPage) {
+        currentPage = 1;
+    }
+
+    const totalPages =
+        Math.ceil(filteredCourts.length / courtsPerPage) || 1;
+
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+    console.log(
+        "Số sân:", filteredCourts.length,
+        "totalPages:", totalPages,
+        "currentPage sau =", currentPage
+    );
+
+    console.log("currentPage sau =", currentPage);
+
     renderTable();
 }
 
@@ -79,7 +104,6 @@ function renderTable() {
         displayCourts.forEach(court => {
             const slotInfo = bookedSlots.find(s => s.court_id === court.id && s.start_time === startTime && s.status !== 'canceled');
             let btnHtml = '';
-debugger;
             if (!slotInfo) {
                 if (isPastHour) {
                     btnHtml = `<button disabled class="w-full h-10 bg-gray-200 text-gray-400 font-semibold rounded shadow-sm text-sm cursor-not-allowed border border-gray-300">Đã qua giờ</button>`;

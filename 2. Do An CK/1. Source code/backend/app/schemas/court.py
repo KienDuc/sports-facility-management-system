@@ -8,7 +8,7 @@ class CourtBase(BaseModel):
   )
   type: str = Field(
       ...,
-      description="Loại sân: football, badminton, tennis",
+      description="Loại sân: football, badminton, pickleball",
       examples=["football"],
   )
   price_per_hour: float = Field(

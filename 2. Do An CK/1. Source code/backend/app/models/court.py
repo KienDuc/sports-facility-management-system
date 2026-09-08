@@ -8,7 +8,7 @@ class Court(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
-    type = Column(String(50), nullable=False) # football, badminton, tennis
+    type = Column(String(50), nullable=False) # football, badminton, pickleball
     price_per_hour = Column(Float, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
