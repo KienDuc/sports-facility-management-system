@@ -15,6 +15,8 @@
    * Nhấn "Next" -> Nhập đường dẫn và chọn tên file "sfms.db" trong folder source này.
    * Nhấn "Finish"
 
+4. Để sử dụng AI chatbot, cần vào link dưới đây và copy API Key, sau đó dán vào file config.py tại mục GEMINI_API_KEY:
+   * https://aistudio.google.com/api-keys?project=gen-lang-client-0943556207
 
 
 \--------------------------------------------

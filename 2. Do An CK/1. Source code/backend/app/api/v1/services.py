@@ -14,8 +14,7 @@ router = APIRouter(tags=["Services"])
 # --- 1. API: LẤY DANH SÁCH DỊCH VỤ ---
 @router.get("/", response_model=List[ServiceResponse])
 def get_services(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     return db.query(Service).all()
 
