@@ -193,14 +193,24 @@
 
             <!-- Dịch vụ gia tăng -->
             <div>
-              <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-slate-700 transition shadow-sm">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" id="addonWater" onchange="toggleAddon(120000, this.checked)" checked class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">
-                  <span>Ướp lạnh 1 thùng nước khoáng cao cấp (24 chai)</span>
-                </div>
-                <span class="text-emerald-700 font-bold bg-emerald-100/60 px-2 py-1 rounded">+120.000 đ</span>
-              </label>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">4. Dịch vụ tiện ích</label>
+
+              <!-- CHỖ CHỨA DỊCH VỤ ĐỘNG SẼ ĐƯỢC JS ĐỔ VÀO ĐÂY -->
+              <div id="dynamicServices" class="flex flex-col gap-3">
+                  <div class="text-xs text-slate-400 italic p-2 text-center">
+                      <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải dịch vụ...
+                  </div>
+              </div>
             </div>
+<!--            <div>-->
+<!--              <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-slate-700 transition shadow-sm">-->
+<!--                <div class="flex items-center gap-3">-->
+<!--                  <input type="checkbox" id="addonWater" onchange="toggleAddon(120000, this.checked)" checked class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer">-->
+<!--                  <span>Ướp lạnh 1 thùng nước khoáng cao cấp (24 chai)</span>-->
+<!--                </div>-->
+<!--                <span class="text-emerald-700 font-bold bg-emerald-100/60 px-2 py-1 rounded">+120.000 đ</span>-->
+<!--              </label>-->
+<!--            </div>-->
           </div>
 
           <!-- CỘT PHẢI (6 COLS): MẶT SÂN TƯƠNG TÁC + ROBOT AI -->
@@ -324,7 +334,7 @@
             <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Chi phí từ</span>
             <span class="text-xl font-extrabold text-emerald-600">250k<span class="text-sm text-slate-400 font-medium">/giờ</span></span>
           </div>
-          <a href="/booking?sport=football" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-md">Chọn Sân</a>
+          <button onclick="scrollToBooking('football')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-md">Chọn Sân</button>
         </div>
       </div>
 
@@ -345,7 +355,7 @@
             <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Chi phí từ</span>
             <span class="text-xl font-extrabold text-cyan-600">180k<span class="text-sm text-slate-400 font-medium">/giờ</span></span>
           </div>
-          <a href="/booking?sport=pickleball" class="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-md">Chọn Sân</a>
+          <button onclick="scrollToBooking('pickleball')" class="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-md">Chọn Sân</button>
         </div>
       </div>
 
@@ -366,7 +376,7 @@
             <span class="text-[11px] text-slate-400 block font-semibold uppercase tracking-wider">Chi phí từ</span>
             <span class="text-xl font-extrabold text-violet-600">120k<span class="text-sm text-slate-400 font-medium">/giờ</span></span>
           </div>
-          <a href="/booking?sport=badminton" class="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-md">Chọn Sân</a>
+          <button onclick="scrollToBooking('badminton')" class="px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition shadow-md">Chọn Sân</button>
         </div>
       </div>
 
@@ -493,7 +503,7 @@
           <i class="fa-solid fa-robot"></i>
         </div>
         <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-200 text-slate-800 shadow-sm max-w-[85%] leading-relaxed">
-          Xin chào! Tôi là trợ lý ảo của Elite Sport. Bạn cần hỗ trợ kiểm tra sân trống, xem bảng giá hay tìm đội thi đấu?
+          Dạ, xin chào! Em là trợ lý ảo của Elite Sport. Anh/chị cần hỗ trợ kiểm tra sân trống, xem bảng giá hay tìm đội thi đấu ạ?
         </div>
       </div>
     </div>
@@ -522,7 +532,7 @@
         <h3 class="text-xl font-extrabold text-slate-900 mb-1">Xác Nhận Đặt Sân</h3>
         <p class="text-xs font-medium text-slate-500 mb-5">Vui lòng để lại thông tin để nhân viên liên hệ</p>
 
-        <form id="publicBookingForm" onsubmit="submitPublicBooking(event)">
+        <form id="publicBookingForm" onsubmit="submitPublicBooking(event)" class="space-y-4">
             <div class="space-y-4 mb-6">
                 <div>
                     <label class="block text-sm font-bold text-slate-600 mb-1.5">Sân đã chọn</label>
@@ -545,6 +555,11 @@
                 <div>
                     <label class="block text-sm font-bold text-slate-600 mb-1.5">Số điện thoại <span class="text-red-500">*</span></label>
                     <input type="text" id="pbCustomerPhone" required placeholder="VD: 0901234567" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Dịch Vụ Đi Kèm (Tùy chọn):</label>
+                <div id="modalDynamicServices" class="space-y-2 max-h-36 overflow-y-auto p-2 border border-slate-200 rounded-xl bg-slate-50">
                 </div>
             </div>
             <button type="submit" id="pbSubmitBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition flex justify-center items-center gap-2">

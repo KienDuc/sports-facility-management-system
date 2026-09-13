@@ -1,9 +1,11 @@
 import time
 from typing import Optional
-from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+
+from app.models import BookingService
+from app.schemas.booking import BookingCreate, BookingStatusUpdate
 from backend.app.db.session import get_db
 from backend.app.models.booking import Booking, BookingSlot
 from backend.app.models.court import Court
@@ -11,20 +13,6 @@ from backend.app.api.v1.deps import get_current_user
 from backend.app.models.user import User
 
 router = APIRouter(tags=["Bookings"])
-
-# --- SCHEMAS (Đã thêm thông tin khách hàng và Schema cập nhật) ---
-class BookingCreate(BaseModel):
-    court_id: int
-    booking_date: str
-    start_time: str
-    end_time: str
-    customer_name: str
-    customer_phone: str
-    status: str = "booked" # Mặc định là booked (Màu Đỏ)
-
-class BookingStatusUpdate(BaseModel):
-    status: str
-
 
 # --- 0. API: DANH SÁCH ĐƠN ĐẶT & TRA CỨU (Tìm theo Mã đơn / Tên KH / SĐT, lọc theo trạng thái & ngày) ---
 @router.get("/")
@@ -119,6 +107,7 @@ def get_schedule(date: str, db: Session = Depends(get_db)):
         result.append({
             "court_id": slot.court_id,
             "start_time": slot.start_time,
+            "end_time": slot.end_time,
             "status": booking.status, # Trả về đúng status (booked/playing) cho Frontend đổi màu
             "customer": booking.customer_name,
             "phone": booking.customer_phone,
@@ -140,7 +129,22 @@ def create_booking(
     if not court:
         raise HTTPException(status_code=404, detail="Không tìm thấy sân")
 
-    # Tạo mã đơn
+    # 1. Tính toán thời gian và tổng tiền
+    start_hour = int(data.start_time.split(':')[0])
+    end_hour = int(data.end_time.split(':')[0])
+    duration = end_hour - start_hour
+
+    if duration <= 0:
+        raise HTTPException(status_code=400, detail="Giờ kết thúc phải lớn hơn giờ bắt đầu")
+
+    # 1. Tính tiền sân cơ bản
+    court_total = court.price_per_hour * duration
+
+    # 2. Tính tiền dịch vụ đi kèm
+    services_total = sum([item.unit_price * item.quantity for item in data.services])
+
+    # Tổng tiền = Tiền sân + Tiền dịch vụ
+    total_price = court_total + services_total
     booking_code = f"BK{int(time.time())}"
 
     # Lưu vào bảng Booking
@@ -149,7 +153,7 @@ def create_booking(
         customer_name=data.customer_name,
         customer_phone=data.customer_phone,
         booking_date=data.booking_date,
-        total_price=court.price_per_hour,
+        total_price=total_price,
         status=data.status,
         note="Admin đặt trực tiếp từ hệ thống",
         created_by=current_user.username
@@ -159,15 +163,31 @@ def create_booking(
     db.refresh(new_booking)
 
     # Lưu vào bảng BookingSlot
-    new_slot = BookingSlot(
-        booking_id=new_booking.id,
-        court_id=data.court_id,
-        booking_date=data.booking_date,
-        start_time=data.start_time,
-        end_time=data.end_time,
-        price=court.price_per_hour
-    )
-    db.add(new_slot)
+    for h in range(start_hour, end_hour):
+        slot_start = f"{h:02d}:00"
+        slot_end = f"{h + 1:02d}:00"
+
+        new_slot = BookingSlot(
+            booking_id=new_booking.id,
+            court_id=data.court_id,
+            booking_date=data.booking_date,
+            start_time=slot_start,
+            end_time=slot_end,
+            price=court.price_per_hour  # Giá của 1 tiếng
+        )
+        db.add(new_slot)
+
+    # Lưu BookingService (Các dịch vụ kèm theo)
+    for s in data.services:
+        new_bs = BookingService(
+            booking_id=new_booking.id,
+            service_id=s.service_id,
+            quantity=s.quantity,
+            unit_price=s.unit_price,
+            total_price=s.unit_price * s.quantity
+        )
+        db.add(new_bs)
+
     db.commit()
 
     return {"message": "Thành công", "booking_code": booking_code}
@@ -204,7 +224,7 @@ def cancel_booking(
         raise HTTPException(status_code=404, detail="Không tìm thấy đơn đặt")
 
     # 1. XÓA chi tiết giờ (BookingSlot) để giải phóng ma trận, giúp ô trở về màu XANH
-    db.query(BookingSlot).filter(BookingSlot.booking_id == booking.id).delete()
+    # db.query(BookingSlot).filter(BookingSlot.booking_id == booking.id).delete()
 
     # 2. VẪN GIỮ LẠI đơn đặt chính (Booking) nhưng đổi status thành 'canceled' để lưu lịch sử
     booking.status = "canceled"
@@ -221,8 +241,23 @@ def create_public_booking(data: BookingCreate, db: Session = Depends(get_db)):
     if not court:
         raise HTTPException(status_code=404, detail="Không tìm thấy sân")
 
-    # 2. Tạo mã đơn
-    booking_code = f"ONL{int(time.time())}" # Đặt tiếp đầu ngữ ONL (Online) để Admin dễ phân biệt
+    # 1. Tính toán thời gian và tổng tiền
+    start_hour = int(data.start_time.split(':')[0])
+    end_hour = int(data.end_time.split(':')[0])
+    duration = end_hour - start_hour
+
+    if duration <= 0:
+        raise HTTPException(status_code=400, detail="Giờ kết thúc phải lớn hơn giờ bắt đầu")
+
+    # 1. Tính tiền sân cơ bản
+    court_total = court.price_per_hour * duration
+
+    # 2. Tính tiền dịch vụ đi kèm từ Frontend gửi lên
+    services_total = sum([item.unit_price * item.quantity for item in data.services])
+
+    # Tổng tiền = Tiền sân + Tiền dịch vụ
+    total_price = court_total + services_total
+    booking_code = f"ONL{int(time.time())}"
 
     # 3. Lưu Booking với trạng thái 'booked' (Đã đặt)
     new_booking = Booking(
@@ -230,7 +265,7 @@ def create_public_booking(data: BookingCreate, db: Session = Depends(get_db)):
         customer_name=data.customer_name,
         customer_phone=data.customer_phone,
         booking_date=data.booking_date,
-        total_price=court.price_per_hour, # (Trong thực tế bạn có thể nhân với số giờ)
+        total_price=total_price, # (Trong thực tế bạn có thể nhân với số giờ)
         status="booked",
         note="Khách vãng lai đặt qua Website",
         created_by="Guest" # Ghi nhận hệ thống
@@ -240,15 +275,31 @@ def create_public_booking(data: BookingCreate, db: Session = Depends(get_db)):
     db.refresh(new_booking)
 
     # 4. Lưu BookingSlot
-    new_slot = BookingSlot(
-        booking_id=new_booking.id,
-        court_id=data.court_id,
-        booking_date=data.booking_date,
-        start_time=data.start_time,
-        end_time=data.end_time,
-        price=court.price_per_hour
-    )
-    db.add(new_slot)
+    for h in range(start_hour, end_hour):
+        slot_start = f"{h:02d}:00"
+        slot_end = f"{h + 1:02d}:00"
+
+        new_slot = BookingSlot(
+            booking_id=new_booking.id,
+            court_id=data.court_id,
+            booking_date=data.booking_date,
+            start_time=slot_start,
+            end_time=slot_end,
+            price=court.price_per_hour  # Giá của 1 tiếng
+        )
+        db.add(new_slot)
+
+    # 5. LƯU DỊCH VỤ VÀO BẢNG BOOKING_SERVICES
+    for s in data.services:
+        new_bs = BookingService(
+            booking_id=new_booking.id,
+            service_id=s.service_id,
+            quantity=s.quantity,
+            unit_price=s.unit_price,
+            total_price=s.unit_price * s.quantity
+        )
+        db.add(new_bs)
+
     db.commit()
 
     return {"message": "Thành công", "booking_code": booking_code}
