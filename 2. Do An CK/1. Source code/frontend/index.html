@@ -192,15 +192,24 @@
 <!--            </div>-->
 
             <!-- Dịch vụ gia tăng -->
-            <div>
-              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">4. Dịch vụ tiện ích</label>
+<!--            <div>-->
+<!--              <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">4. Dịch vụ tiện ích</label>-->
 
-              <!-- CHỖ CHỨA DỊCH VỤ ĐỘNG SẼ ĐƯỢC JS ĐỔ VÀO ĐÂY -->
-              <div id="dynamicServices" class="flex flex-col gap-3">
-                  <div class="text-xs text-slate-400 italic p-2 text-center">
-                      <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải dịch vụ...
-                  </div>
-              </div>
+<!--              <div id="dynamicServices" class="flex flex-col gap-3">-->
+<!--                  <div class="text-xs text-slate-400 italic p-2 text-center">-->
+<!--                      <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải dịch vụ...-->
+<!--                  </div>-->
+<!--              </div>-->
+<!--            </div>-->
+            <div class="mt-8">
+                <h3 class="text-sm font-extrabold text-slate-500 uppercase tracking-wider mb-4">4. Dịch Vụ Tiện Ích</h3>
+
+                <div class="h-64 overflow-y-auto pr-3 custom-scrollbar">
+                    <!-- Khung chứa dịch vụ do JS render -->
+                    <div id="dynamicServices" class="w-full"></div>
+                </div>
+
+                <p class="text-[11px] text-slate-400 mt-2 italic">* Cuộn xuống để xem thêm các dịch vụ khác.</p>
             </div>
 <!--            <div>-->
 <!--              <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-slate-700 transition shadow-sm">-->

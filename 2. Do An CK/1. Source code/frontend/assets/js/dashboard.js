@@ -247,21 +247,48 @@ function renderServices() {
          return;
     }
 
-    let htmlContent = '';
+    let htmlContent = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">';
     systemServices.forEach(srv => {
          htmlContent += `
-            <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50/50 cursor-pointer text-xs font-semibold text-slate-700 transition shadow-sm gap-2">
-                <div class="flex items-center gap-2.5 shrink">
-                    <input type="checkbox" data-id="${srv.id}" value="${srv.price}" onchange="handleServiceChange(this)" class="service-checkbox w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0">
-                    <span class="truncate whitespace-normal">${srv.name}</span>
+            <div class="service-item flex flex-col p-2.5 rounded-xl border border-slate-200 bg-white transition shadow-sm" data-id="${srv.id}" data-price="${srv.price}">
+                <label class="flex items-center justify-between cursor-pointer w-full gap-2">
+                    <div class="flex items-center gap-2.5 shrink">
+                        <input type="checkbox" onchange="handleServiceChange(this)" class="service-checkbox w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 cursor-pointer shrink-0">
+                        <span class="text-xs font-semibold text-slate-700 truncate whitespace-normal">${srv.name}</span>
+                    </div>
+                    <span class="text-emerald-700 text-xs font-bold bg-emerald-100/60 px-2.5 py-1 rounded shrink-0 whitespace-nowrap">
+                        +${srv.price.toLocaleString('vi-VN')} đ
+                    </span>
+                </label>
+
+                <!-- Trình chọn số lượng -->
+                <div class="qty-control hidden items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                    <span class="text-[11px] text-slate-500 font-medium">Số lượng:</span>
+                    <div class="flex items-center bg-slate-50 rounded-lg p-0.5 border border-slate-200">
+                        <button type="button" onclick="changeQty(this, -1)" class="w-6 h-6 flex items-center justify-center hover:bg-slate-200 rounded text-slate-600 transition"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                        
+                        <!-- 👉 ĐÃ SỬA CHỖ NÀY: Thêm text-slate-800 (chữ đen đậm), py-1 (canh giữa), và lớp CSS để giấu mũi tên mặc định -->
+                        <input type="number" value="1" min="1" max="50" onchange="handleQtyInput(this)" class="service-qty w-10 text-center text-xs font-bold text-slate-800 bg-transparent border-none p-0 py-1 focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        
+                        <button type="button" onclick="changeQty(this, 1)" class="w-6 h-6 flex items-center justify-center hover:bg-slate-200 rounded text-slate-600 transition"><i class="fa-solid fa-plus text-[10px]"></i></button>
+                    </div>
                 </div>
-                <span class="text-emerald-700 font-bold bg-emerald-100/60 px-2 py-0.5 rounded shrink-0 whitespace-nowrap">+${srv.price.toLocaleString('vi-VN')} đ</span>
-            </label>
+            </div>
          `;
     });
 
-    if(container) container.innerHTML = htmlContent;
-    if(modalContainer) modalContainer.innerHTML = htmlContent;
+    htmlContent += '</div>';
+
+    if (container) {
+        container.innerHTML = htmlContent;
+    }
+
+    if (modalContainer) {
+        // Đẩy content vào Popup, nhưng xóa class chia 2 cột ('sm:grid-cols-2')
+        // để trên Popup nó hiện 1 cột cho gọn, tránh bị tràn form.
+        let modalHtmlContent = htmlContent.replace('sm:grid-cols-2', '');
+        modalContainer.innerHTML = modalHtmlContent;
+    }
 
     checkServiceAvailability();
 }
@@ -478,11 +505,13 @@ function selectPublicSlot(btn, start, end) {
 
 function calcTotal() {
     const courtTotal = selectedSlotTime ? (sportRate * slotHours) : 0;
-
     let outsideAddon = 0;
-    // Chỉ gom checkbox ở ngoài (#dynamicServices)
+
     document.querySelectorAll('#dynamicServices .service-checkbox:checked').forEach(cb => {
-        outsideAddon += parseFloat(cb.value);
+        const item = cb.closest('.service-item');
+        const price = parseFloat(item.getAttribute('data-price'));
+        const qty = parseInt(item.querySelector('.service-qty').value) || 1;
+        outsideAddon += (price * qty);
     });
 
     const total = courtTotal + outsideAddon;
@@ -499,7 +528,10 @@ function calcPopupTotal() {
     let popupAddon = 0;
     // Chỉ gom checkbox bên trong Popup (#modalDynamicServices)
     document.querySelectorAll('#modalDynamicServices .service-checkbox:checked').forEach(cb => {
-        popupAddon += parseFloat(cb.value);
+        const item = cb.closest('.service-item');
+        const price = parseFloat(item.getAttribute('data-price'));
+        const qty = parseInt(item.querySelector('.service-qty').value) || 1;
+        popupAddon += (price * qty);
     });
 
     const total = courtTotal + popupAddon;
@@ -522,7 +554,10 @@ function openPublicBookingModal(isFromAI = false, aiData = null) {
         modalSlotHours = aiData.hours;
 
         // Xóa sạch tick bên trong Popup
-        document.querySelectorAll('#modalDynamicServices .service-checkbox').forEach(cb => cb.checked = false);
+        document.querySelectorAll('#modalDynamicServices .service-checkbox').forEach(cb => {
+            cb.checked = false;
+            handleServiceChange(cb);
+        });
     } else {
         // NẾU THỦ CÔNG: Kiểm tra xem đã chọn ngoài chưa rồi copy vào Modal
         if(!selectedCourtInfo || !selectedSlotTime) {
@@ -539,8 +574,15 @@ function openPublicBookingModal(isFromAI = false, aiData = null) {
         // Copy trạng thái tick từ ngoài vào trong
         const outsideCbs = document.querySelectorAll('#dynamicServices .service-checkbox');
         const insideCbs = document.querySelectorAll('#modalDynamicServices .service-checkbox');
+        const outsideQtys = document.querySelectorAll('#dynamicServices .service-qty');
+        const insideQtys = document.querySelectorAll('#modalDynamicServices .service-qty');
+
         outsideCbs.forEach((outCb, index) => {
-            if (insideCbs[index]) insideCbs[index].checked = outCb.checked;
+            if (insideCbs[index]) {
+                insideCbs[index].checked = outCb.checked;
+                insideQtys[index].value = outsideQtys[index].value;
+                handleServiceChange(insideCbs[index]); // Kích hoạt hiển thị UI trong popup
+            }
         });
     }
 
@@ -566,12 +608,15 @@ async function submitPublicBooking(e) {
 
     let selectedServices = [];
     document.querySelectorAll('#modalDynamicServices .service-checkbox:checked').forEach(cb => {
-        const serviceId = parseInt(cb.getAttribute('data-id'));
-        const price = parseFloat(cb.value);
+        const item = cb.closest('.service-item');
+        const serviceId = parseInt(item.getAttribute('data-id'));
+        const price = parseFloat(item.getAttribute('data-price'));
+
+        const qty = parseInt(item.querySelector('.service-qty').value) || 1;
 
         selectedServices.push({
             service_id: serviceId,
-            quantity: 1,
+            quantity: qty,
             unit_price: price
         });
     });
@@ -980,11 +1025,45 @@ function triggerAIBooking(courtId, courtName, price, dateStr, startTime, endTime
 }
 
 function handleServiceChange(checkbox) {
+    const item = checkbox.closest('.service-item');
+    const qtyControl = item.querySelector('.qty-control');
+
+    if (checkbox.checked) {
+        qtyControl.classList.remove('hidden');
+        qtyControl.classList.add('flex'); // Trải bộ đếm ra
+        item.classList.add('border-emerald-400', 'bg-emerald-50/30');
+    } else {
+        qtyControl.classList.add('hidden');
+        qtyControl.classList.remove('flex');
+        item.classList.remove('border-emerald-400', 'bg-emerald-50/30');
+        item.querySelector('.service-qty').value = 1; // Khách bỏ tick thì reset số lượng về 1
+    }
+
     if (checkbox.closest('#modalDynamicServices')) {
         calcPopupTotal();
     } else {
         calcTotal();
     }
+}
+
+function changeQty(btn, delta) {
+    const input = btn.parentElement.querySelector('.service-qty');
+    let newVal = parseInt(input.value) + delta;
+    if (newVal < 1) newVal = 1;
+    if (newVal > 50) newVal = 50;
+    input.value = newVal;
+
+    if (btn.closest('#modalDynamicServices')) { calcPopupTotal(); }
+    else { calcTotal(); }
+}
+
+function handleQtyInput(input) {
+    let val = parseInt(input.value);
+    if (isNaN(val) || val < 1) input.value = 1;
+    if (val > 50) input.value = 50;
+
+    if (input.closest('#modalDynamicServices')) { calcPopupTotal(); }
+    else { calcTotal(); }
 }
 
 function checkServiceAvailability() {
@@ -994,17 +1073,17 @@ function checkServiceAvailability() {
     checkboxes.forEach(cb => {
         // Khóa checkbox nếu chưa chọn giờ, mở khóa nếu đã chọn
         cb.disabled = !hasSelectedSlot;
+        const item = cb.closest('.service-item');
 
-        const label = cb.closest('label');
         if (!hasSelectedSlot) {
-            label.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-50');
+            item.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-50');
             cb.classList.add('cursor-not-allowed');
-            // Nếu khách lỡ tay tick rồi mà bị mất giờ, phải bỏ tick và trừ tiền đi
             if (cb.checked) {
                 cb.checked = false;
+                handleServiceChange(cb); // Ép ẩn số lượng
             }
         } else {
-            label.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-50');
+            item.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-50');
             cb.classList.remove('cursor-not-allowed');
         }
     });
