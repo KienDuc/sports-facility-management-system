@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.models import Service, Court
+from backend.app.models.service import Service
+from backend.app.models.court import Court
 from sqlalchemy.orm import Session
 from backend.app.db.session import get_db
 from backend.app.schemas.ai import AIChatRequest, AIChatResponse
