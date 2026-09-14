@@ -563,7 +563,16 @@
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-600 mb-1.5">Số điện thoại <span class="text-red-500">*</span></label>
-                    <input type="text" id="pbCustomerPhone" required placeholder="VD: 0901234567" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none">
+                    <input
+                        type="tel"
+                        id="pbCustomerPhone"
+                        required
+                        maxlength="10"
+                        pattern="0[0-9]{9}"
+                        inputmode="numeric"
+                        placeholder="VD: 0901234567"
+                        class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none"
+                    >
                 </div>
             </div>
             <div>

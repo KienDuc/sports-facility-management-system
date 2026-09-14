@@ -140,24 +140,49 @@ function closeBookingModal() {
 
 async function confirmBooking(event) {
     event.preventDefault();
+
+    const customerName = document.getElementById('customerName').value.trim();
+    const customerPhone = document.getElementById('customerPhone').value.trim();
+
+    if (!customerName) {
+        alert("Tên khách hàng không được để trống hoặc chỉ chứa khoảng trắng");
+        return;
+    }
+
+    if (!/^0\d{9}$/.test(customerPhone)) {
+        alert("Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0");
+        return;
+    }
+
     const payload = {
         court_id: parseInt(document.getElementById('bookingCourtId').value),
         booking_date: document.getElementById('filterDate').value,
         start_time: document.getElementById('bookingTime').innerText.split(' - ')[0],
         end_time: document.getElementById('bookingTime').innerText.split(' - ')[1],
-        customer_name: document.getElementById('customerName').value,
-        customer_phone: document.getElementById('customerPhone').value,
+        customer_name: customerName,
+        customer_phone: customerPhone,
         status: document.getElementById('bookingStatus').value
     };
 
     try {
         const res = await fetchWithAuth(`${API_BOOKINGS}/`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-        if (res.ok) { closeBookingModal(); fetchData(); }
-        else alert("Lỗi hệ thống");
-    } catch (error) { alert("Lỗi mạng!"); }
+
+        if (res.ok) {
+            closeBookingModal();
+            fetchData();
+        } else {
+            alert("Lỗi hệ thống");
+        }
+
+    } catch (error) {
+        alert("Lỗi mạng!");
+    }
 }
+
 
 function openDetailModal(slotInfo) {
     currentSlotInfo = slotInfo;

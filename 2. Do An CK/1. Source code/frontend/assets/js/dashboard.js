@@ -611,13 +611,12 @@ async function submitPublicBooking(e) {
         return;
     }
 
-    // 3. Validate SDT: Phải là số và đủ 10 hoặc 11 số
-    // Regex này kiểm tra: Chỉ chứa chữ số, bắt đầu bằng số 0, và tổng độ dài từ 10-11 ký tự
-    const phoneRegex = /(0[3|5|7|8|9])+([0-9]{8})\b/g;
-    const simplePhoneRegex = /^[0-9]{10,11}$/;
+    // 3. Validate SDT: Phải là số và đủ 10
+    // Regex này kiểm tra: Chỉ chứa chữ số, bắt đầu bằng số 0, và tổng độ dài 10 ký tự
+    const phoneRegex = /^0\d{9}$/;
 
-    if (!simplePhoneRegex.test(customerPhone)) {
-        alert("Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 hoặc 11 chữ số!");
+    if (!phoneRegex.test(customerPhone)) {
+        alert("Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0");
         document.getElementById('pbCustomerPhone').focus();
         return;
     }
@@ -646,8 +645,8 @@ async function submitPublicBooking(e) {
         booking_date: modalDateStr,
         start_time: modalSlotTime.split(' - ')[0],
         end_time: modalSlotTime.split(' - ')[1],
-        customer_name: document.getElementById('pbCustomerName').value.trim(),
-        customer_phone: document.getElementById('pbCustomerPhone').value.trim(),
+        customer_name: customerName,
+        customer_phone: customerPhone,
         status: "booked",
         services: selectedServices
     };
