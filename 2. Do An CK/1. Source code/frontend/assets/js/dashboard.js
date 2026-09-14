@@ -600,11 +600,31 @@ function openPublicBookingModal(isFromAI = false, aiData = null) {
 // Submit yêu cầu lên server
 async function submitPublicBooking(e) {
     e.preventDefault();
+
+    const customerName = document.getElementById('pbCustomerName').value.trim();
+    const customerPhone = document.getElementById('pbCustomerPhone').value.trim();
+
+    // 2. Validate: Phải có chữ, không được rỗng hoặc chỉ có dấu cách
+    if (customerName.length === 0) {
+        alert("Vui lòng nhập tên của bạn để hệ thống ghi nhận nhé!");
+        document.getElementById('pbCustomerName').focus();
+        return;
+    }
+
+    // 3. Validate SDT: Phải là số và đủ 10 hoặc 11 số
+    // Regex này kiểm tra: Chỉ chứa chữ số, bắt đầu bằng số 0, và tổng độ dài từ 10-11 ký tự
+    const phoneRegex = /(0[3|5|7|8|9])+([0-9]{8})\b/g;
+    const simplePhoneRegex = /^[0-9]{10,11}$/;
+
+    if (!simplePhoneRegex.test(customerPhone)) {
+        alert("Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 hoặc 11 chữ số!");
+        document.getElementById('pbCustomerPhone').focus();
+        return;
+    }
+
     const btn = document.getElementById('pbSubmitBtn');
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
     btn.disabled = true;
-
-    const customerName = document.getElementById('pbCustomerName').value;
 
     let selectedServices = [];
     document.querySelectorAll('#modalDynamicServices .service-checkbox:checked').forEach(cb => {
@@ -626,8 +646,8 @@ async function submitPublicBooking(e) {
         booking_date: modalDateStr,
         start_time: modalSlotTime.split(' - ')[0],
         end_time: modalSlotTime.split(' - ')[1],
-        customer_name: document.getElementById('pbCustomerName').value,
-        customer_phone: document.getElementById('pbCustomerPhone').value,
+        customer_name: document.getElementById('pbCustomerName').value.trim(),
+        customer_phone: document.getElementById('pbCustomerPhone').value.trim(),
         status: "booked",
         services: selectedServices
     };
