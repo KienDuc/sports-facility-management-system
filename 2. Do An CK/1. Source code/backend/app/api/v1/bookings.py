@@ -3,9 +3,10 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from datetime import datetime
 
-from app.models import BookingService
-from app.schemas.booking import BookingCreate, BookingStatusUpdate
+from backend.app.models import BookingService
+from backend.app.schemas.booking import BookingCreate, BookingStatusUpdate
 from backend.app.db.session import get_db
 from backend.app.models.booking import Booking, BookingSlot
 from backend.app.models.court import Court
@@ -201,17 +202,68 @@ def update_booking_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    booking = db.query(Booking).filter(Booking.booking_code == booking_code).first()
-    if not booking:
-        raise HTTPException(status_code=404, detail="Không tìm thấy đơn đặt")
+    booking = (
+        db.query(Booking)
+        .filter(Booking.booking_code == booking_code)
+        .first()
+    )
 
+    if not booking:
+        raise HTTPException(
+            status_code=404,
+            detail="Không tìm thấy đơn đặt"
+        )
+
+    # Nếu chuyển sang trạng thái Đang chơi thì kiểm tra thời gian booking
+    if data.status == "playing":
+        booking_slots = (
+            db.query(BookingSlot)
+            .filter(BookingSlot.booking_id == booking.id)
+            .order_by(BookingSlot.start_time.asc())
+            .all()
+        )
+
+        if not booking_slots:
+            raise HTTPException(
+                status_code=404,
+                detail="Không tìm thấy khung giờ của booking"
+            )
+
+        now = datetime.now()
+
+        first_slot = booking_slots[0]
+        last_slot = booking_slots[-1]
+
+        start_datetime = datetime.strptime(
+            f"{first_slot.booking_date} {first_slot.start_time}",
+            "%Y-%m-%d %H:%M"
+        )
+
+        end_datetime = datetime.strptime(
+            f"{last_slot.booking_date} {last_slot.end_time}",
+            "%Y-%m-%d %H:%M"
+        )
+
+        if now < start_datetime:
+            raise HTTPException(
+                status_code=400,
+                detail="Chưa đến giờ sử dụng sân"
+            )
+
+        if now >= end_datetime:
+            raise HTTPException(
+                status_code=400,
+                detail="Khung giờ đặt sân đã kết thúc"
+            )
+
+    # Cập nhật trạng thái
     booking.status = data.status
     booking.updated_by = current_user.username
     db.commit()
 
-    return {"message": f"Đã cập nhật trạng thái thành {data.status}"}
-
-
+    return {
+        "message": f"Đã cập nhật trạng thái thành {data.status}"
+    }
 # --- 4. API: HỦY ĐƠN ĐẶT SÂN (TRẢ LẠI Ô TRỐNG XANH) ---
 @router.delete("/{booking_code}")
 def cancel_booking(

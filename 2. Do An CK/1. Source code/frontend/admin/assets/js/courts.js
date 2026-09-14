@@ -99,10 +99,30 @@ function nextPage() {
 
 async function submitNewCourt(event) {
     event.preventDefault();
+
+    const name = document.getElementById('addCourtName').value.trim();
+    const type = document.getElementById('addCourtType').value.trim();
+    const price = parseFloat(document.getElementById('addCourtPrice').value);
+
+    if (!name) {
+        alert("Tên sân không được để trống hoặc chỉ chứa khoảng trắng");
+        return;
+    }
+
+    if (!type) {
+        alert("Loại sân không được để trống");
+        return;
+    }
+
+    if (isNaN(price) || price <= 0) {
+        alert("Giá thuê sân phải lớn hơn 0");
+        return;
+    }
+
     const data = {
-        name: document.getElementById('addCourtName').value,
-        type: document.getElementById('addCourtType').value,
-        price_per_hour: parseFloat(document.getElementById('addCourtPrice').value),
+        name: name,
+        type: type,
+        price_per_hour: price,
         is_active: true
     };
 
@@ -112,21 +132,48 @@ async function submitNewCourt(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
         if (response.ok) {
             alert("Đã thêm sân mới thành công!");
             closeAddModal();
             fetchAndRenderCourts();
-        } else alert("Lỗi khi thêm");
-    } catch (error) { alert("Lỗi mạng!"); }
+        } else {
+            alert("Lỗi khi thêm");
+        }
+
+    } catch (error) {
+        alert("Lỗi mạng!");
+    }
 }
 
 async function submitEditCourt(event) {
     event.preventDefault();
+
     const courtId = document.getElementById('editCourtId').value;
+
+    const name = document.getElementById('editCourtName').value.trim();
+    const type = document.getElementById('editCourtType').value.trim();
+    const price = parseFloat(document.getElementById('editCourtPrice').value);
+
+    if (!name) {
+        alert("Tên sân không được để trống hoặc chỉ chứa khoảng trắng");
+        return;
+    }
+
+    if (!type) {
+        alert("Loại sân không được để trống");
+        return;
+    }
+
+    if (isNaN(price) || price <= 0) {
+        alert("Giá thuê sân phải lớn hơn 0");
+        return;
+    }
+
     const data = {
-        name: document.getElementById('editCourtName').value,
-        type: document.getElementById('editCourtType').value,
-        price_per_hour: parseFloat(document.getElementById('editCourtPrice').value)
+        name: name,
+        type: type,
+        price_per_hour: price
     };
 
     try {
@@ -135,12 +182,18 @@ async function submitEditCourt(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
         if (response.ok) {
             alert("Đã cập nhật thông tin sân thành công!");
             closeEditModal();
             fetchAndRenderCourts();
-        } else alert("Lỗi khi cập nhật");
-    } catch (error) { alert("Lỗi mạng!"); }
+        } else {
+            alert("Lỗi khi cập nhật");
+        }
+
+    } catch (error) {
+        alert("Lỗi mạng!");
+    }
 }
 
 async function toggleActive(courtId, checkbox) {

@@ -10,6 +10,10 @@ async function fetchAndRenderBookings() {
     const statusVal = document.getElementById('filterStatus').value;
     const dateFrom = document.getElementById('filterDateFrom').value;
     const dateTo = document.getElementById('filterDateTo').value;
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+    alert("Từ ngày không được lớn hơn Đến ngày");
+    return;
+    }
 
     if (keyword) params.append('keyword', keyword);
     if (statusVal && statusVal !== 'all') params.append('status', statusVal);

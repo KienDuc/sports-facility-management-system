@@ -99,10 +99,30 @@ function nextPage() {
 
 async function submitNewService(event) {
     event.preventDefault();
+
+    const name = document.getElementById('addServiceName').value.trim();
+    const unit = document.getElementById('addServiceUnit').value.trim();
+    const price = parseFloat(document.getElementById('addServicePrice').value);
+
+    if (!name) {
+        alert("Tên dịch vụ không được để trống hoặc chỉ chứa khoảng trắng");
+        return;
+    }
+
+    if (!unit) {
+        alert("Đơn vị tính không được để trống");
+        return;
+    }
+
+    if (isNaN(price) || price <= 0) {
+        alert("Giá dịch vụ phải lớn hơn 0");
+        return;
+    }
+
     const data = {
-        name: document.getElementById('addServiceName').value,
-        unit: document.getElementById('addServiceUnit').value,
-        price: parseFloat(document.getElementById('addServicePrice').value),
+        name: name,
+        unit: unit,
+        price: price,
         is_available: true
     };
 
@@ -112,21 +132,48 @@ async function submitNewService(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
         if (response.ok) {
             alert("Đã thêm dịch vụ mới thành công!");
             closeAddModal();
             fetchAndRenderServices();
-        } else alert("Lỗi khi thêm");
-    } catch (error) { alert("Lỗi mạng!"); }
+        } else {
+            alert("Lỗi khi thêm");
+        }
+
+    } catch (error) {
+        alert("Lỗi mạng!");
+    }
 }
 
 async function submitEditService(event) {
     event.preventDefault();
+
     const serviceId = document.getElementById('editServiceId').value;
+
+    const name = document.getElementById('editServiceName').value.trim();
+    const unit = document.getElementById('editServiceUnit').value.trim();
+    const price = parseFloat(document.getElementById('editServicePrice').value);
+
+    if (!name) {
+        alert("Tên dịch vụ không được để trống hoặc chỉ chứa khoảng trắng");
+        return;
+    }
+
+    if (!unit) {
+        alert("Đơn vị tính không được để trống");
+        return;
+    }
+
+    if (isNaN(price) || price <= 0) {
+        alert("Giá dịch vụ phải lớn hơn 0");
+        return;
+    }
+
     const data = {
-        name: document.getElementById('editServiceName').value,
-        unit: document.getElementById('editServiceUnit').value,
-        price: parseFloat(document.getElementById('editServicePrice').value)
+        name: name,
+        unit: unit,
+        price: price
     };
 
     try {
@@ -135,12 +182,18 @@ async function submitEditService(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
         if (response.ok) {
             alert("Đã cập nhật dịch vụ thành công!");
             closeEditModal();
             fetchAndRenderServices();
-        } else alert("Lỗi khi cập nhật");
-    } catch (error) { alert("Lỗi mạng!"); }
+        } else {
+            alert("Lỗi khi cập nhật");
+        }
+
+    } catch (error) {
+        alert("Lỗi mạng!");
+    }
 }
 
 async function toggleAvailable(serviceId, checkbox) {

@@ -103,13 +103,51 @@ class AdminHeader extends HTMLElement {
             </div>
 
             <div class="flex items-center space-x-4">
-                <button class="text-gray-500 hover:text-gray-700 relative">
-                    <i class="fa-regular fa-bell text-xl"></i>
-                    <span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                    </span>
-                </button>
+                <div class="relative">
+    <button
+        id="notificationBell"
+        onclick="toggleNotifications()"
+        class="text-gray-500 hover:text-gray-700 relative p-2"
+    >
+        <i class="fa-regular fa-bell text-xl"></i>
+
+        <span
+            id="notificationBadge"
+            class="hidden absolute top-0 right-0 bg-red-500 text-white
+                   text-[10px] font-bold min-w-[18px] h-[18px]
+                   px-1 rounded-full items-center justify-center"
+        >
+            0
+        </span>
+    </button>
+
+        <div
+            id="notificationDropdown"
+            class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg
+                shadow-xl border border-gray-200 z-50 overflow-hidden"
+        >
+            <div class="px-4 py-3 border-b font-semibold text-gray-700">
+                Đơn đặt mới
+            </div>
+
+            <div
+                id="notificationList"
+                class="max-h-80 overflow-y-auto"
+            >
+                <div class="p-4 text-sm text-gray-400">
+                    Đang tải...
+                </div>
+            </div>
+
+            <a
+                href="/admin/bookings.html"
+                class="block text-center px-4 py-3 text-sm text-emerald-600
+                    hover:bg-gray-50 border-t"
+            >
+                Xem tất cả đơn đặt
+            </a>
+        </div>
+    </div>
                 <button onclick="logout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-red-100 transition whitespace-nowrap">
                     Đăng xuất
                 </button>
@@ -201,4 +239,132 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (error) {
         console.error("Lỗi xác thực hệ thống:", error);
     }
+});
+let notificationBookings = [];
+
+function toggleNotifications() {
+    const dropdown = document.getElementById("notificationDropdown");
+    const badge = document.getElementById("notificationBadge");
+
+    if (!dropdown) return;
+
+    const isOpening = dropdown.classList.contains("hidden");
+    dropdown.classList.toggle("hidden");
+
+    // Khi mở chuông -> đánh dấu các booking hiện tại là đã xem
+    if (isOpening) {
+        const seenCodes = JSON.parse(
+            localStorage.getItem("elite_sport_seen_notifications") || "[]"
+        );
+
+        notificationBookings.forEach(booking => {
+            if (!seenCodes.includes(booking.booking_code)) {
+                seenCodes.push(booking.booking_code);
+            }
+        });
+
+        localStorage.setItem(
+            "elite_sport_seen_notifications",
+            JSON.stringify(seenCodes)
+        );
+
+        if (badge) {
+            badge.classList.add("hidden");
+            badge.classList.remove("flex");
+        }
+    }
+}
+
+async function loadNotifications() {
+    const token =
+        localStorage.getItem("elite_sport_token") ||
+        sessionStorage.getItem("elite_sport_token");
+
+    if (!token) return;
+
+    try {
+        const response = await fetch(
+            `${CONFIG.API_BASE_URL}/bookings/`,
+            {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        if (!response.ok) return;
+
+        const bookings = await response.json();
+
+        // Lấy 5 booking mới nhất
+        notificationBookings = bookings.slice(0, 5);
+
+        renderNotifications();
+
+    } catch (error) {
+        console.error("Lỗi tải thông báo:", error);
+    }
+}
+
+function renderNotifications() {
+    const list = document.getElementById("notificationList");
+    const badge = document.getElementById("notificationBadge");
+
+    if (!list || !badge) return;
+
+    const seenCodes = JSON.parse(
+    localStorage.getItem("elite_sport_seen_notifications") || "[]"
+    );
+
+    const unreadCount = notificationBookings.filter(
+        booking => !seenCodes.includes(booking.booking_code)
+    ).length;
+
+    if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.classList.remove("hidden");
+        badge.classList.add("flex");
+    } else {
+        badge.classList.add("hidden");
+        badge.classList.remove("flex");
+    }
+
+    if (notificationBookings.length === 0) {
+        list.innerHTML = `
+            <div class="p-4 text-sm text-gray-400 text-center">
+                Chưa có đơn đặt
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = notificationBookings.map(booking => `
+        <a
+            href="/admin/bookings.html"
+            class="block px-4 py-3 border-b hover:bg-gray-50"
+        >
+            <div class="font-semibold text-sm text-gray-700">
+                ${booking.customer_name}
+            </div>
+
+            <div class="text-xs text-gray-500 mt-1">
+                ${booking.booking_code}
+                • ${booking.booking_date}
+            </div>
+
+            <div class="text-xs text-emerald-600 mt-1">
+                ${Number(booking.total_price || 0).toLocaleString("vi-VN")} đ
+            </div>
+        </a>
+    `).join("");
+}
+
+
+// Sau khi trang load thì lấy thông báo
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(loadNotifications, 500);
+
+    // Cập nhật mỗi 10 giây
+    setInterval(loadNotifications, 10000);
 });

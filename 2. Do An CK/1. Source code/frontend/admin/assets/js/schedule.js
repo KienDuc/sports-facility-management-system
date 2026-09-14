@@ -196,14 +196,29 @@ function closeDetailModal() {
 
 async function updateBookingStatus(newStatus) {
     try {
-        const res = await fetchWithAuth(`${API_BOOKINGS}/${currentSlotInfo.booking_code}/status`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus })
-        });
-        if(res.ok) { closeDetailModal(); fetchData(); }
-        else { alert("Không thể cập nhật trạng thái"); }
-    } catch (e) { alert("Lỗi kết nối"); }
+        const res = await fetchWithAuth(
+            `${API_BOOKINGS}/${currentSlotInfo.booking_code}/status`,
+            {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            }
+        );
+
+        const result = await res.json();
+
+        if (res.ok) {
+            alert(result.message || "Cập nhật trạng thái thành công");
+            closeDetailModal();
+            fetchData();
+        } else {
+            alert(result.detail || "Không thể cập nhật trạng thái");
+        }
+
+    } catch (e) {
+        console.error(e);
+        alert("Không thể kết nối đến máy chủ");
+    }
 }
 
 async function completeBooking() {
