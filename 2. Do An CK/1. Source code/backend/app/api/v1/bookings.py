@@ -137,7 +137,31 @@ def create_booking(
 
     if duration <= 0:
         raise HTTPException(status_code=400, detail="Giờ kết thúc phải lớn hơn giờ bắt đầu")
+    # Không cho tạo booking trạng thái "playing" nếu chưa đến giờ
+    if data.status == "playing":
+        now = datetime.now()
 
+        start_datetime = datetime.strptime(
+            f"{data.booking_date} {data.start_time}",
+            "%Y-%m-%d %H:%M"
+        )
+
+        end_datetime = datetime.strptime(
+            f"{data.booking_date} {data.end_time}",
+            "%Y-%m-%d %H:%M"
+        )
+
+        if now < start_datetime:
+            raise HTTPException(
+                status_code=400,
+                detail="Chưa đến giờ sử dụng sân"
+            )
+
+        if now >= end_datetime:
+            raise HTTPException(
+                status_code=400,
+                detail="Khung giờ đặt sân đã kết thúc"
+            )
     # 1. Tính tiền sân cơ bản
     court_total = court.price_per_hour * duration
 

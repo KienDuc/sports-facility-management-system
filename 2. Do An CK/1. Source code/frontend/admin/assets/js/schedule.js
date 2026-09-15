@@ -170,13 +170,15 @@ async function confirmBooking(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+    const result = await res.json();
 
-        if (res.ok) {
-            closeBookingModal();
-            fetchData();
-        } else {
-            alert("Lỗi hệ thống");
-        }
+    if (res.ok) {
+        closeBookingModal();
+        fetchData();
+    } else {
+        alert(result.detail || "Lỗi hệ thống");
+    }
+        
 
     } catch (error) {
         alert("Lỗi mạng!");
