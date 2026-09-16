@@ -18,7 +18,8 @@
 4. Để sử dụng AI chatbot, cần vào link dưới đây và copy API Key, sau đó dán vào file config.py tại mục GEMINI_API_KEY:
    * https://aistudio.google.com/api-keys?project=gen-lang-client-0943556207
 
-
+5. Mở Teminal -> Đi tới thư mục gốc (1. Source code) -> nhập lệnh dưới đây và enter:
+   python -m backend.app.models.seed_demo
 \--------------------------------------------
 
 sfms/

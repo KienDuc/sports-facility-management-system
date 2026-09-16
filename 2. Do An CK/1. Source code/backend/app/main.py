@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Hàm tạo tài khoản Admin mặc định khi khởi chạy server ---
+# Tạo tài khoản Admin mặc định khi khởi chạy server
 def init_db():
     db: Session = SessionLocal()
     try:

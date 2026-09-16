@@ -9,11 +9,18 @@ from backend.app.models.court import Court
 from backend.app.models.service import Service
 from backend.app.models.booking import Booking, BookingSlot, BookingService
 
+# Vị trí file config.py hiện tại (vd: backend/app/models/seed_demo.py)
+CURRENT_FILE = Path(__file__).resolve()
 
-DB_PATH = Path("sfms.db")
-BACKUP_PATH = Path(
-    f"sfms_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
-)
+# thư mục 'backend'
+BACKEND_DIR = CURRENT_FILE.parent.parent.parent
+
+# Tạo một thư mục riêng tên là 'data' bên trong 'backend'
+DATA_DIR = BACKEND_DIR / "data"
+DATA_DIR.mkdir(exist_ok=True) # Tạo folder 'data' nếu chưa tồn tại
+
+DB_PATH = DATA_DIR / "sfms.db"
+BACKUP_PATH = DATA_DIR / f"sfms_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
 
 
 COURTS = [
